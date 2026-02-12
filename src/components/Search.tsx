@@ -6,38 +6,31 @@ interface SearchResult {
   id: string;
   name: string;
   short_name: string;
-  company_category?: string;
 }
 
 interface GlobalSearchProps {
   companies: SearchResult[];
   onSelect: (companyId: string) => void;
   placeholder?: string;
-  query?: string;
-  onQueryChange?: (value: string) => void;
 }
 
 export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   companies,
   onSelect,
   placeholder = 'Search by company name...',
-  query,
-  onQueryChange,
 }) => {
-  const [internalQuery, setInternalQuery] = useState('');
+  const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
 
-  const effectiveQuery = query ?? internalQuery;
-
   useEffect(() => {
-    if (!effectiveQuery.trim()) {
+    if (!query.trim()) {
       setFilteredResults([]);
       setIsOpen(false);
       return;
     }
 
-    const lowerQuery = effectiveQuery.toLowerCase();
+    const lowerQuery = query.toLowerCase();
     const results = companies
       .filter(
         (company) =>
@@ -45,19 +38,15 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
           company.short_name.toLowerCase().includes(lowerQuery)
       )
       .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(0, 5);
+      .slice(0, 10);
 
     setFilteredResults(results);
-    setIsOpen(true);
-  }, [effectiveQuery, companies]);
+    setIsOpen(results.length > 0);
+  }, [query, companies]);
 
   const handleSelect = (companyId: string) => {
     onSelect(companyId);
-    if (onQueryChange) {
-      onQueryChange('');
-    } else {
-      setInternalQuery('');
-    }
+    setQuery('');
     setIsOpen(false);
   };
 
@@ -67,20 +56,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
         icon={<Search className="h-4 w-4" />}
         type="text"
         placeholder={placeholder}
-        value={effectiveQuery}
-        onChange={(e) => {
-          if (onQueryChange) {
-            onQueryChange(e.target.value);
-          } else {
-            setInternalQuery(e.target.value);
-          }
-        }}
-        onFocus={() => effectiveQuery && setIsOpen(true)}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onFocus={() => query && setIsOpen(true)}
         onBlur={() => setTimeout(() => setIsOpen(false), 200)}
         className="w-full text-lg py-3 pl-11 pr-4"
       />
 
-      {isOpen && (
+      {isOpen && filteredResults.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
           <div className="max-h-80 overflow-y-auto">
             {filteredResults.map((result) => (
@@ -89,24 +72,15 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                 onClick={() => handleSelect(result.id)}
                 className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-0"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-slate-900">{result.name}</p>
-                    <p className="text-xs text-slate-600">{result.short_name}</p>
-                  </div>
-                  {result.company_category && (
-                    <span className="px-2 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded-full">
-                      {result.company_category}
-                    </span>
-                  )}
-                </div>
+                <p className="font-semibold text-slate-900">{result.name}</p>
+                <p className="text-xs text-slate-600">{result.short_name}</p>
               </button>
             ))}
           </div>
 
           {filteredResults.length === 0 && (
             <div className="px-4 py-6 text-center text-slate-600">
-              <p>No companies found matching your search.</p>
+              <p>No companies found</p>
             </div>
           )}
         </div>

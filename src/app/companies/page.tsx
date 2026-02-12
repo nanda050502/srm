@@ -1,65 +1,47 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { Layout, CompanyCard } from '@/components';
-import { getCompaniesFull } from '@/utils/data';
+import { getCompaniesShort } from '@/utils/data';
 import { Input } from '@/components/UI';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export default function CompaniesPage() {
-  const companies = getCompaniesFull();
+  const companies = getCompaniesShort();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    const categoryParam = searchParams.get('category') || 'all';
-    setSelectedCategory(categoryParam);
-  }, [searchParams]);
 
   const filteredCompanies = useMemo(() => {
     let results = companies;
 
-    if (selectedCategory !== 'all') {
-      results = results.filter(
-        (c) => c.company_category?.toLowerCase().replace(/\s+/g, '-') === selectedCategory
-      );
-    }
-
+    // Filter by search query
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();
       results = results.filter(
         (c) =>
           c.name.toLowerCase().includes(lowerQuery) ||
-          c.short_name.toLowerCase().includes(lowerQuery)
+          c.short_name.toLowerCase().includes(lowerQuery) ||
+          c.category.toLowerCase().includes(lowerQuery)
       );
+    }
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      results = results.filter((c) => c.category === selectedCategory);
     }
 
     return results;
   }, [companies, searchQuery, selectedCategory]);
 
-  const categories = ['all', 'marquee', 'super-dream', 'dream', 'regular'];
-
-  const handleCategoryChange = (category: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (category === 'all') {
-      params.delete('category');
-    } else {
-      params.set('category', category);
-    }
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  const categories = ['all', ...new Set(companies.map((c) => c.category))];
 
   return (
     <Layout>
       <div className="space-y-8 px-8 py-8">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Companies</h1>
-          <p className="text-slate-600">Explore {companies.length} recruiting partners</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">All Companies</h1>
+          <p className="text-slate-600">Explore {companies.length} premier companies hiring our graduates</p>
         </div>
 
         {/* Filters */}
@@ -70,7 +52,7 @@ export default function CompaniesPage() {
             <Input
               icon={<Search className="h-4 w-4" />}
               type="text"
-              placeholder="Search company by name (e.g., Google, Infosys, Amazon)"
+              placeholder="Search by company name or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -80,17 +62,17 @@ export default function CompaniesPage() {
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-3">Category</label>
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat, index) => (
+              {categories.map((cat) => (
                 <button
-                  key={`category-${index}-${cat}`}
-                  onClick={() => handleCategoryChange(cat)}
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                     selectedCategory === cat
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
                   }`}
                 >
-                  {cat === 'all' ? 'All Categories' : cat.replace('-', ' ')}
+                  {cat === 'all' ? 'All Categories' : cat}
                 </button>
               ))}
             </div>
@@ -98,9 +80,6 @@ export default function CompaniesPage() {
 
           <div className="text-sm text-slate-600">
             Showing {filteredCompanies.length} of {companies.length} companies
-          </div>
-          <div className="text-xs text-slate-500">
-            Active filter: {selectedCategory === 'all' ? 'All Companies' : selectedCategory.replace('-', ' ')}
           </div>
         </div>
 
