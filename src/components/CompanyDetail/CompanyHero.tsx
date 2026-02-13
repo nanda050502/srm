@@ -9,8 +9,8 @@ interface CompanyHeroProps {
 
 export default function CompanyHero({ company }: CompanyHeroProps) {
   const [imageError, setImageError] = useState(!company.logo_url);
-  const offices = company.office_locations.split(';').map((o) => o.trim());
-  const countries = company.operating_countries.split(';').map((c) => c.trim());
+  const offices = (company.office_locations || '').split(';').filter(o => o).map((o) => o.trim());
+  const countries = (company.operating_countries || '').split(';').filter(c => c).map((c) => c.trim());
   const initials = company.short_name.substring(0, 2).toUpperCase();
   const colors = ['bg-blue-600', 'bg-slate-700', 'bg-emerald-600', 'bg-amber-600', 'bg-indigo-600', 'bg-rose-600'];
   const colorIndex = company.short_name.charCodeAt(0) % colors.length;
