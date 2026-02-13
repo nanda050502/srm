@@ -8,34 +8,32 @@ export interface CompanyShort {
   short_name: string;
   logo_url: string;
   category: string;
-  employee_size: string;
-  operating_countries: string;
-  office_locations: string;
-  yoy_growth_rate: string | number;
+  employee_size?: string;
+  operating_countries?: string;
+  office_locations?: string;
+  yoy_growth_rate?: string | number;
 }
 
 export interface CompanyFull extends CompanyShort {
   [key: string]: any;
 }
 
-// Normalize company ID
+// Normalize company ID - use company_id as the unique identifier
 const normalizeCompany = (company: any): CompanyShort & { id: string } => ({
   ...company,
-  id: company.id || `comp_${company.company_id}`,
+  id: company.id || company.company_id?.toString() || `company_${Math.random().toString(36).substr(2, 9)}`,
 });
 
 export const getCompaniesShort = (): (CompanyShort & { id: string })[] => {
-  const companies = Array.isArray(companiesShort) ? companiesShort : [companiesShort];
-  return companies.map(normalizeCompany);
+  return companiesShort.map(normalizeCompany);
 };
 
 export const getCompaniesFull = (): (CompanyFull & { id: string })[] => {
-  const companies = Array.isArray(companiesFull) ? companiesFull : [companiesFull];
-  return companies.map(normalizeCompany);
+  return companiesFull.map(normalizeCompany);
 };
 
 export const getCompanyById = (id: string): (CompanyFull & { id: string }) | undefined => {
-  const company = getCompaniesFull().find((c) => c.id === id || c.id === id.replace('comp_', ''));
+  const company = getCompaniesFull().find((c) => c.id === id || c.company_id?.toString() === id);
   return company;
 };
 
@@ -51,6 +49,7 @@ export const searchCompanies = (query: string): (CompanyShort & { id: string })[
 export const categorizeCompanies = (companies: (CompanyShort & { id: string })[]) => {
   // Categorize by employee size for dashboard
   const marquee = companies.filter((c) => {
+    if (!c.employee_size) return false;
     const size = c.employee_size.toLowerCase();
     return size.includes('thousand') || size.includes('million') || parseInt(size) > 100000;
   });
@@ -60,18 +59,20 @@ export const categorizeCompanies = (companies: (CompanyShort & { id: string })[]
     return parseFloat(rate.toString().replace('%', '')) || 0;
   };
   
-  const superDream = companies.filter((c) => parseGrowth(c.yoy_growth_rate) > 15);
+  const superDream = companies.filter((c) => c.yoy_growth_rate && parseGrowth(c.yoy_growth_rate) > 15);
   const dream = companies.filter((c) => {
+    if (!c.yoy_growth_rate) return false;
     const growth = parseGrowth(c.yoy_growth_rate);
     return growth > 10 && growth <= 15;
   });
-  const regular = companies.filter((c) => parseGrowth(c.yoy_growth_rate) <= 10);
+  const regular = companies.filter((c) => c.yoy_growth_rate && parseGrowth(c.yoy_growth_rate) <= 10);
 
   return { marquee, superDream, dream, regular };
 };
 
 export const getStatistics = (companies: (CompanyShort & { id: string })[]) => {
-  const parseGrowth = (rate: string | number): number => {
+  const parseGrowth = (rate: string | number | undefined): number => {
+    if (!rate) return 0;
     if (typeof rate === 'number') return rate;
     return parseFloat(rate.toString().replace('%', '')) || 0;
   };

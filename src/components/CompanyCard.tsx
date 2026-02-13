@@ -8,10 +8,10 @@ interface CompanyCardProps {
   short_name: string;
   logo_url: string;
   category: string;
-  employee_size: string;
-  office_locations: string;
-  operating_countries: string;
-  yoy_growth_rate: string | number;
+  employee_size?: string;
+  office_locations?: string;
+  operating_countries?: string;
+  yoy_growth_rate?: string | number;
 }
 
 export const CompanyCard: React.FC<CompanyCardProps> = ({
@@ -26,11 +26,12 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({
   yoy_growth_rate,
 }) => {
   const [imageError, setImageError] = useState(!logo_url);
-  const offices = office_locations.split(';').map((o) => o.trim());
-  const countries = operating_countries.split(';').map((c) => c.trim());
+  const offices = office_locations ? office_locations.split(';').map((o) => o.trim()) : [];
+  const countries = operating_countries ? operating_countries.split(';').map((c) => c.trim()) : [];
   
   // Normalize growth rate
   const normalizeGrowth = (rate: string | number) => {
+    if (!rate) return '0';
     if (typeof rate === 'number') return rate.toFixed(1);
     return rate.toString().replace('%', '').trim();
   };
@@ -71,38 +72,44 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({
           <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
             {name}
           </h3>
-          <p className="text-xs text-slate-600 mt-1">{employee_size} employees</p>
+          {employee_size && <p className="text-xs text-slate-600 mt-1">{employee_size} employees</p>}
         </div>
 
         {/* Card Body */}
         <div className="p-4 space-y-4">
           {/* Operating Countries */}
-          <div>
-            <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Operating Countries</p>
-            <div className="flex flex-wrap gap-1">
-              {countries.slice(0, 3).map((country) => (
-                <Chip key={country} label={country} variant="secondary" />
-              ))}
-              {countries.length > 3 && <Chip label={`+${countries.length - 3}`} variant="secondary" />}
+          {countries.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Operating Countries</p>
+              <div className="flex flex-wrap gap-1">
+                {countries.slice(0, 3).map((country) => (
+                  <Chip key={country} label={country} variant="secondary" />
+                ))}
+                {countries.length > 3 && <Chip label={`+${countries.length - 3}`} variant="secondary" />}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Office Locations */}
-          <div>
-            <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Office Locations</p>
-            <div className="flex flex-wrap gap-1">
-              {offices.slice(0, 2).map((office) => (
-                <Chip key={office} label={office} variant="primary" />
-              ))}
-              {offices.length > 2 && <Chip label={`+${offices.length - 2} more`} variant="primary" />}
+          {offices.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Office Locations</p>
+              <div className="flex flex-wrap gap-1">
+                {offices.slice(0, 2).map((office) => (
+                  <Chip key={office} label={office} variant="primary" />
+                ))}
+                {offices.length > 2 && <Chip label={`+${offices.length - 2} more`} variant="primary" />}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Growth Rate */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
-            <p className="text-xs text-green-700 font-medium">YoY Growth Rate</p>
-            <p className="text-2xl font-bold text-green-900">{normalizeGrowth(yoy_growth_rate)}%</p>
-          </div>
+          {yoy_growth_rate !== undefined && (
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+              <p className="text-xs text-green-700 font-medium">YoY Growth Rate</p>
+              <p className="text-2xl font-bold text-green-900">{normalizeGrowth(yoy_growth_rate)}%</p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

@@ -62,9 +62,9 @@ export default function CompaniesPage() {
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-3">Category</label>
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
+              {categories.map((cat, index) => (
                 <button
-                  key={cat}
+                  key={`category-${index}-${cat}`}
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                     selectedCategory === cat
