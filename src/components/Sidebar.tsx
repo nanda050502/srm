@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   BarChart3,
   Building2,
@@ -19,13 +22,23 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/', icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: 'Companies', href: '/companies', icon: <Building2 className="h-5 w-5" /> },
-  { label: 'Skill Set Analytics', href: '/analytics', icon: <BarChart3 className="h-5 w-5" /> },
-  { label: 'Hiring Rounds', href: '/hiring-rounds', icon: <Target className="h-5 w-5" /> },
-  { label: 'Insights', href: '/insights', icon: <Lightbulb className="h-5 w-5" /> },
+  { label: 'Hiring Skill Set', href: '/hiring-skill-set', icon: <BarChart3 className="h-5 w-5" /> },
+  { label: 'Hiring Process', href: '/hiring-process', icon: <Target className="h-5 w-5" /> },
+  { label: 'INNOVX', href: '/innovx', icon: <Lightbulb className="h-5 w-5" /> },
 ];
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const isSubRoute = navItems.some(
+      (item) => pathname.startsWith(`${item.href}/`) && pathname !== item.href
+    );
+    if (isSubRoute) {
+      setIsOpen(false);
+    }
+  }, [pathname]);
 
   return (
     <aside
@@ -50,17 +63,24 @@ export const Sidebar = () => {
 
       <nav className="px-3 py-6">
         <ul className="space-y-2">
-          {navItems.map((item) => (
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-900 transition-colors duration-200 group"
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 group ${
+                  isActive ? 'bg-blue-100 text-blue-900' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-900'
+                }`}
               >
-                <span className="text-blue-700 group-hover:text-blue-900">{item.icon}</span>
+                <span className={`text-blue-700 ${isActive ? 'text-blue-900' : 'group-hover:text-blue-900'}`}>
+                  {item.icon}
+                </span>
                 {isOpen && <span className="font-medium text-sm">{item.label}</span>}
               </Link>
             </li>
-          ))}
+          );
+          })}
         </ul>
       </nav>
 

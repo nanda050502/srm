@@ -26,6 +26,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 18px;
 }
 
 body {
@@ -77,4 +78,14 @@ input,
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
+
+/* Contrast tuning for body copy */
+.text-slate-500 {
+  color: #475569 !important;
+}
+
+.text-slate-600 {
+  color: #334155 !important;
+}
+
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowRight, Brain, Lightbulb, Target } from 'lucide-react';
 import { CompanyFull } from '@/utils/data';
 
 interface RightSideCardsProps {
@@ -7,70 +6,74 @@ interface RightSideCardsProps {
 }
 
 export default function RightSideCards({ company }: RightSideCardsProps) {
-  const cards = [
-    {
-      id: 'skills',
-      title: 'Skills',
-      description: 'Bloom\'s Taxonomy mapping',
-      icon: <Brain className="h-7 w-7 text-blue-700" />,
-      color: 'from-blue-50 to-blue-100',
-      borderColor: 'border-blue-200',
-    },
-    {
-      id: 'innovx',
-      title: 'InnovX',
-      description: 'Innovation projects',
-      icon: <Lightbulb className="h-7 w-7 text-purple-700" />,
-      color: 'from-purple-50 to-purple-100',
-      borderColor: 'border-purple-200',
-    },
-    {
-      id: 'hiring',
-      title: 'Hiring Rounds',
-      description: 'Job roles & process',
-      icon: <Target className="h-7 w-7 text-green-700" />,
-      color: 'from-green-50 to-green-100',
-      borderColor: 'border-green-200',
-    },
-  ];
+  const headquarters = company.headquarters_address || company.headquarters;
+  const employeeCount = company.employee_size;
+  const officeCount = company.office_count;
+  const operatingCountries = company.operating_countries;
+  const focusSectors = company.focus_sectors ? company.focus_sectors.split(';').slice(0, 3).join('; ') : undefined;
+  const founded = (company.incorporation_year || company.founded_year)?.toString();
+  const stage = company.company_stage;
 
   return (
     <div className="sticky top-24 space-y-4">
-      {cards.map((card) => (
-        <button
-          key={card.id}
-          className={`w-full bg-gradient-to-br ${card.color} border ${card.borderColor} rounded-xl p-4 text-left hover:shadow-lg transition-all duration-300 group`}
-        >
-          <div className="flex items-start justify-between mb-3">
-            <span>{card.icon}</span>
-            <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 transition-colors" />
-          </div>
-          <h3 className="font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">{card.title}</h3>
-          <p className="text-xs text-slate-700">{card.description}</p>
-          <p className="text-xs font-semibold text-slate-600 mt-3 group-hover:text-slate-900 transition-colors">
-            Explore {card.title.toLowerCase()}
-          </p>
-        </button>
-      ))}
-
       {/* Key Metrics */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+      <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
         <h4 className="font-bold text-slate-900">Quick Stats</h4>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-slate-600">Founded</span>
-            <span className="font-semibold text-slate-900">{company.founded_year}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-600">Stage</span>
-            <span className="font-semibold text-slate-900">{company.company_stage}</span>
-          </div>
+        <div className="space-y-2.5 text-sm">
+          {company.category && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Category</span>
+              <span className="font-semibold text-slate-900">{company.category}</span>
+            </div>
+          )}
+          {company.nature_of_company && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Type</span>
+              <span className="font-semibold text-slate-900">{company.nature_of_company}</span>
+            </div>
+          )}
+          {founded && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Founded</span>
+              <span className="font-semibold text-slate-900">{founded}</span>
+            </div>
+          )}
+          {stage && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Stage</span>
+              <span className="font-semibold text-slate-900">{stage}</span>
+            </div>
+          )}
           {company.market_cap_usd && (
             <div className="flex justify-between">
               <span className="text-slate-600">Market Cap</span>
               <span className="font-semibold text-slate-900">
                 ${(parseInt(company.market_cap_usd) / 1000000000000).toFixed(1)}T
               </span>
+            </div>
+          )}
+          {employeeCount && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Employees</span>
+              <span className="font-semibold text-slate-900">{employeeCount}</span>
+            </div>
+          )}
+          {officeCount && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Offices</span>
+              <span className="font-semibold text-slate-900">{officeCount}</span>
+            </div>
+          )}
+          {operatingCountries && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Operating In</span>
+              <span className="font-semibold text-slate-900 text-right text-xs">{operatingCountries}</span>
+            </div>
+          )}
+          {focusSectors && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Focus Sectors</span>
+              <span className="font-semibold text-slate-900 text-right text-xs">{focusSectors}</span>
             </div>
           )}
         </div>

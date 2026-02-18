@@ -28,6 +28,7 @@ interface MetricCardProps {
   description?: string;
   trend?: 'up' | 'down';
   trendValue?: string;
+  onClick?: () => void;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -37,9 +38,27 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   description,
   trend,
   trendValue,
+  onClick,
 }) => {
   return (
-    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300">
+    <div
+      className={`bg-white rounded-xl p-6 border border-slate-200 shadow-sm transition-all duration-300 ${
+        onClick ? 'hover:shadow-md hover:border-slate-300 cursor-pointer' : ''
+      }`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-slate-600 mb-2">{label}</p>

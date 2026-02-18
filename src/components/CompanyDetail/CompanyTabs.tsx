@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Brain,
   Briefcase,
@@ -11,7 +11,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Tabs, Chip } from '../UI';
-import { CompanyFull, BLOOM_LEVELS, generateMockSkills, getBloomDescription } from '@/utils/data';
+import { CompanyFull, getHiringRoundsData } from '@/utils/data';
 
 interface CompanyTabsProps {
   company: CompanyFull;
@@ -20,31 +20,98 @@ interface CompanyTabsProps {
 }
 
 export default function CompanyTabs({ company, activeTab, onTabChange }: CompanyTabsProps) {
-  const [selectedSkills, setSelectedSkills] = useState<(typeof BLOOM_LEVELS)[number]>('CU');
-  const mockSkills = generateMockSkills();
+  const hiringData = getHiringRoundsData(company.name);
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: <ClipboardList className="h-4 w-4" /> },
-    { id: 'business', label: 'Business & Market', icon: <Briefcase className="h-4 w-4" /> },
-    { id: 'leadership', label: 'Leadership', icon: <Users className="h-4 w-4" /> },
-    { id: 'financials', label: 'Financials', icon: <Wallet className="h-4 w-4" /> },
-    { id: 'technology', label: 'Technology', icon: <Cpu className="h-4 w-4" /> },
-    { id: 'culture', label: 'Culture & Work Life', icon: <Leaf className="h-4 w-4" /> },
-    { id: 'risk', label: 'Risk & ESG', icon: <Shield className="h-4 w-4" /> },
-    { id: 'strategy', label: 'Strategy', icon: <Target className="h-4 w-4" /> },
-    { id: 'skills', label: 'Skills (Bloom Taxonomy)', icon: <Brain className="h-4 w-4" /> },
+  const hasValue = (value: unknown) => value !== undefined && value !== null && value !== '';
+  const hasAny = (values: unknown[]) => values.some(hasValue);
+
+  const tabConfig = [
+    {
+      id: 'overview',
+      label: 'Overview',
+      icon: <ClipboardList className="h-4 w-4" />,
+      hasData: () => true,
+    },
+    {
+      id: 'business',
+      label: 'Business & Market',
+      icon: <Briefcase className="h-4 w-4" />,
+      hasData: () =>
+        hasAny([
+          company.key_markets,
+          company.customer_base_size,
+          company.competitive_advantages,
+          company.product_portfolio_count,
+        ]),
+    },
+    {
+      id: 'leadership',
+      label: 'Leadership',
+      icon: <Users className="h-4 w-4" />,
+      hasData: () => hasAny([company.ceo_name, company.key_executives, company.corporate_governance]),
+    },
+    {
+      id: 'financials',
+      label: 'Financials',
+      icon: <Wallet className="h-4 w-4" />,
+      hasData: () => hasAny([company.revenue_usd, company.market_cap_usd, company.profitability_status]),
+    },
+    {
+      id: 'technology',
+      label: 'Technology',
+      icon: <Cpu className="h-4 w-4" />,
+      hasData: () => hasAny([company.technical_stack, company.data_infrastructure, company.ai_capability_level]),
+    },
+    {
+      id: 'culture',
+      label: 'Culture & Work Life',
+      icon: <Leaf className="h-4 w-4" />,
+      hasData: () => hasAny([company.employee_size, company.workplace_culture, company.remote_work_policy]),
+    },
+    {
+      id: 'risk',
+      label: 'Risk & ESG',
+      icon: <Shield className="h-4 w-4" />,
+      hasData: () => hasAny([company.esg_rating, company.risk_management_framework, company.compliance_certifications]),
+    },
+    {
+      id: 'strategy',
+      label: 'Strategy',
+      icon: <Target className="h-4 w-4" />,
+      hasData: () => hasAny([company.strategic_focus_areas, company.growth_trajectory, company.future_outlook]),
+    },
+    {
+      id: 'skills',
+      label: 'Hiring Focus',
+      icon: <Brain className="h-4 w-4" />,
+      hasData: () => true,
+    },
   ];
+
+  const tabs = tabConfig.filter((tab) => tab.hasData()).map(({ id, label, icon }) => ({ id, label, icon }));
+
+  useEffect(() => {
+    if (!tabs.find((tab) => tab.id === activeTab)) {
+      onTabChange(tabs[0]?.id || 'overview');
+    }
+  }, [activeTab, onTabChange, tabs]);
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
         return (
           <div className="space-y-6">
+            {company.overview_text && (
+              <Section title="About the Company">
+                <p className="text-slate-700 leading-relaxed">{company.overview_text}</p>
+              </Section>
+            )}
+
             <Section title="Company Overview">
               <InfoGrid
                 data={{
-                  'Founded': company.founded_year?.toString(),
-                  'Headquarters': company.headquarters,
+                  'Founded': (company.incorporation_year || company.founded_year)?.toString(),
+                  'Headquarters': company.headquarters_address || company.headquarters,
                   'Company Stage': company.company_stage,
                   'Industry': company.industry_segment,
                   'Sub-segment': company.sub_segment,
@@ -53,20 +120,59 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
               />
             </Section>
 
+            {company.vision_statement && (
+              <Section title="Vision">
+                <p className="text-slate-700 leading-relaxed">{company.vision_statement}</p>
+              </Section>
+            )}
+
+            {company.mission_statement && (
+              <Section title="Mission">
+                <p className="text-slate-700 leading-relaxed">{company.mission_statement}</p>
+              </Section>
+            )}
+
+            {company.core_values && (
+              <Section title="Core Values">
+                <div className="flex flex-wrap gap-2">
+                  {company.core_values.split(';').map((value) => (
+                    <span key={value} className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm font-medium text-blue-900">
+                      {value.trim()}
+                    </span>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {company.core_value_proposition && (
+              <Section title="Core Value Proposition">
+                <div className="flex flex-wrap gap-2">
+                  {company.core_value_proposition.split(';').map((value) => (
+                    <span key={value} className="px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm font-medium text-green-900">
+                      {value.trim()}
+                    </span>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {company.unique_differentiators && (
+              <Section title="Unique Differentiators">
+                <div className="flex flex-wrap gap-2">
+                  {company.unique_differentiators.split(';').map((value) => (
+                    <span key={value} className="px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-sm font-medium text-indigo-900">
+                      {value.trim()}
+                    </span>
+                  ))}
+                </div>
+              </Section>
+            )}
+
             {company.acquisition_history && (
               <Section title="Acquisitions">
                 <p className="text-slate-700">{company.acquisition_history}</p>
               </Section>
             )}
-
-            <Section title="Geographic Presence">
-              <InfoGrid
-                data={{
-                  'Geographic Coverage': company.geographic_presence,
-                  'Regional HQs': company.regional_hq,
-                }}
-              />
-            </Section>
           </div>
         );
 
@@ -100,7 +206,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
               <InfoGrid
                 data={{
                   'Net Promoter Score': company.net_promoter_score?.toString(),
-                  'Customer Retention': `${company.customer_retention_rate}%`,
+                  'Customer Retention': company.customer_retention_rate ? `${company.customer_retention_rate}%` : undefined,
                   'Satisfaction Score': company.customer_satisfaction_score?.toString(),
                 }}
               />
@@ -131,9 +237,10 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
             <Section title="Governance">
               <InfoGrid
                 data={{
-                  'Organizational Structure': company.organizational_structure,
-                  'Corporate Governance': company.corporate_governance,
-                  'Decision Making': company.decision_making_process,
+                  'CEO': company.ceo_name,
+                  'Board Members': company.board_members,
+                  'Key Leadership': company.key_leaders,
+                  'Decision Access Level': company.decision_maker_access,
                 }}
               />
             </Section>
@@ -148,12 +255,20 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
                 data={{
                   'Market Cap': company.market_cap_usd
                     ? `$${(parseInt(company.market_cap_usd) / 1000000000000).toFixed(1)}T`
-                    : 'N/A',
-                  'Revenue': company.revenue_usd
-                    ? `$${(parseInt(company.revenue_usd) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
+                    : undefined,
+                  'Annual Revenue': company.annual_revenue,
+                  'Annual Profit': company.annual_profit,
                   'Profitability': company.profitability_status,
+                }}
+              />
+            </Section>
+
+            <Section title="Revenue Breakdown">
+              <InfoGrid
+                data={{
+                  'Revenue Mix': company.revenue_mix,
                   'Financial Health': company.financial_health,
+                  'Total Capital Raised': company.total_capital_raised,
                 }}
               />
             </Section>
@@ -161,26 +276,10 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
             <Section title="Financial Metrics">
               <InfoGrid
                 data={{
-                  'Operating Margin': `${company.operating_margin}%`,
-                  'Net Profit Margin': `${company.net_profit_margin}%`,
-                  'Debt-to-Equity': company.debt_equity_ratio?.toString(),
-                  'Cash Reserves': company.cash_reserves_usd
-                    ? `$${(parseInt(company.cash_reserves_usd) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
-                }}
-              />
-            </Section>
-
-            <Section title="Investment & Spending">
-              <InfoGrid
-                data={{
-                  'R&D Spending': company.research_development_spending
-                    ? `$${(parseInt(company.research_development_spending) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
-                  'CapEx': company.capital_expenditure
-                    ? `$${(parseInt(company.capital_expenditure) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
-                  'Credit Rating': company.credit_rating,
+                  'YoY Growth': company.yoy_growth_rate ? `${company.yoy_growth_rate}%` : undefined,
+                  'Market Share': company.market_share_percentage,
+                  'Profitability Status': company.profitability_status,
+                  'Financial Health': company.financial_health,
                 }}
               />
             </Section>
@@ -222,10 +321,10 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
             <Section title="Emerging Technologies">
               <InfoGrid
                 data={{
-                  'Blockchain': company.blockchain_initiatives || 'No active initiatives',
-                  'Quantum Computing': company.quantum_computing_involvement || 'Limited involvement',
-                  'IoT': company.iot_ecosystem || 'No IoT focus',
-                  'AR/VR': company.ar_vr_investments || 'No AR/VR investments',
+                  'Blockchain': company.blockchain_initiatives,
+                  'Quantum Computing': company.quantum_computing_involvement,
+                  'IoT': company.iot_ecosystem,
+                  'AR/VR': company.ar_vr_investments,
                 }}
               />
             </Section>
@@ -239,9 +338,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
               <InfoGrid
                 data={{
                   'Employee Size': company.employee_size,
-                  'Hiring Plans 2024': company.hiring_plans_2024,
-                  'Attrition Rate': `${company.attrition_rate}%`,
-                  'Satisfaction Score': company.employee_satisfaction_score?.toString(),
+                  'Employee Turnover': company.employee_turnover,
                 }}
               />
             </Section>
@@ -249,9 +346,9 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
             <Section title="Work Culture">
               <InfoGrid
                 data={{
-                  'Workplace Culture': company.workplace_culture,
-                  'Remote Work Policy': company.remote_work_policy,
-                  'Office Amenities': company.office_amenities,
+                  'Culture Summary': company.work_culture_summary,
+                  'Feedback Culture': company.feedback_culture,
+                  'Learning Culture': company.learning_culture,
                 }}
               />
             </Section>
@@ -259,20 +356,17 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
             <Section title="Diversity & Inclusion">
               <InfoGrid
                 data={{
-                  'Women %': company.diversity_metrics?.match(/(\d+)%\s*women/)?.[1] + '%' || 'N/A',
-                  'Underrepresented Minorities': company.diversity_metrics
-                    ?.match(/(\d+)%\s*underrepresented/)?.[1] + '%' || 'N/A',
+                  'DEI Score & Areas': company.diversity_inclusion_score,
+                  'Diversity Metrics': company.diversity_metrics,
                 }}
               />
             </Section>
 
             <Section title="Benefits & Development">
-              <p className="text-slate-700 mb-3">{company.employee_benefits}</p>
               <InfoGrid
                 data={{
-                  'Training Programs': company.training_programs,
-                  'Skill Development Budget': company.skill_development_budget,
-                  'Mentorship': company.mentorship_programs,
+                  'Lifestyle & Wellness Benefits': company.lifestyle_benefits,
+                  'Training Spend': company.training_spend,
                 }}
               />
             </Section>
@@ -356,56 +450,77 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
           </div>
         );
 
-      case 'skills':
+      case 'skills': {
+        const roles = hiringData?.job_role_details || [];
+        const totalRounds = roles.reduce((sum, role) => sum + (role.hiring_rounds?.length || 0), 0);
+        const skillCounts = new Map<string, number>();
+
+        roles.forEach((role) => {
+          role.hiring_rounds?.forEach((round) => {
+            round.skill_sets?.forEach((skill) => {
+              if (!skill.skill_set_code) return;
+              const code = skill.skill_set_code.trim();
+              if (!code) return;
+              skillCounts.set(code, (skillCounts.get(code) || 0) + 1);
+            });
+          });
+        });
+
+        const topSkills = Array.from(skillCounts.entries())
+          .map(([code, count]) => ({ code, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 8);
+
         return (
           <div className="space-y-6">
-            <Section title="Bloom's Taxonomy - Skills Matrix">
-              <div className="mb-4">
-                <p className="text-sm text-slate-600 mb-3">Select Bloom Level:</p>
-                <div className="flex gap-2 flex-wrap">
-                  {BLOOM_LEVELS.map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setSelectedSkills(level)}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                        selectedSkills === level
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
-                      }`}
-                    >
-                      {level} - {getBloomDescription(level).split(' - ')[0]}
-                    </button>
-                  ))}
+            <Section title="Hiring Focus Snapshot">
+              {!hiringData ? (
+                <div className="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-600">
+                  No hiring rounds data available for this company yet.
                 </div>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-200">
-                <p className="text-sm text-slate-700">{getBloomDescription(selectedSkills)}</p>
-              </div>
-
-              <div className="space-y-3">
-                <p className="font-semibold text-slate-900 mb-4">Skills by {selectedSkills} Level:</p>
-                {Object.entries(mockSkills).map(([skill, levels]) => (
-                  <div key={skill} className="bg-white border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-slate-900">{skill}</h4>
-                      <div className="text-sm font-bold text-blue-600">Level {levels[selectedSkills]}/10</div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Roles</p>
+                      <p className="text-2xl font-bold text-slate-900 mt-2">{roles.length}</p>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all"
-                        style={{ width: `${(levels[selectedSkills] / 10) * 100}%` }}
-                      ></div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Rounds</p>
+                      <p className="text-2xl font-bold text-slate-900 mt-2">{totalRounds}</p>
                     </div>
-                    <p className="text-xs text-slate-600 mt-2">
-                      Topics: Problem Solving, Critical Thinking, Applied Knowledge
-                    </p>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Top Skills</p>
+                      <p className="text-sm font-semibold text-slate-900 mt-2">{topSkills.length} categories</p>
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="bg-white border border-slate-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-slate-900 mb-3">Most Requested Skill Sets</p>
+                    <div className="flex flex-wrap gap-2">
+                      {topSkills.map((skill) => (
+                        <Chip key={skill.code} label={`${skill.code} (${skill.count})`} variant="secondary" />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-slate-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-slate-900 mb-3">Roles Covered</p>
+                    <div className="flex flex-wrap gap-2">
+                      {roles.slice(0, 6).map((role) => (
+                        <Chip key={role.role_title} label={role.role_title} variant="primary" />
+                      ))}
+                      {roles.length > 6 && (
+                        <Chip label={`+${roles.length - 6} more`} variant="accent" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </Section>
           </div>
         );
+      }
 
       default:
         return null;
