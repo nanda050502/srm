@@ -35,7 +35,7 @@ export default function CompanyDetailPage({ params }: PageProps) {
       <div className="space-y-0">
         <CompanyHero company={company} />
 
-        <div className="px-8 py-8 space-y-10">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8 lg:space-y-10">
           <div className="min-w-0">
             <CompanyTabs company={company} activeTab={activeTab} onTabChange={setActiveTab} />
           </div>

@@ -25,72 +25,72 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white px-8 py-16">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
+        <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+          <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6 lg:space-y-8">
             <div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 leading-tight">
                 Discover Your Dream Company
               </h1>
-              <p className="text-xl text-blue-100 mb-8">
+              <p className="text-base sm:text-lg lg:text-xl text-blue-100 mb-4 sm:mb-6 lg:mb-8 px-2">
                 Explore company intelligence, skills requirements, and placement insights powered by real data.
               </p>
             </div>
 
             {/* Hero Search Bar */}
-            <div className="bg-white bg-opacity-95 rounded-2xl p-2 shadow-2xl">
+            <div className="bg-white bg-opacity-95 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-xl sm:shadow-2xl">
               <GlobalSearch companies={searchableCompanies} onSelect={handleSearch} />
             </div>
 
-            <div className="text-sm text-blue-100">
+            <div className="text-xs sm:text-sm text-blue-100">
               <p>Search across {companies.length} companies and their placement insights</p>
             </div>
           </div>
         </section>
 
         {/* Summary Cards Section */}
-        <section className="px-8 py-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Intelligence at a Glance</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <MetricCard label="Total Companies" value={stats.total} icon={<Building2 className="h-7 w-7" />} />
-            <MetricCard label="Marquee Companies" value={marquee.length} icon={<Crown className="h-7 w-7" />} />
-            <MetricCard label="Super Dream Companies" value={superDream.length} icon={<Rocket className="h-7 w-7" />} />
-            <MetricCard label="Dream Companies" value={dream.length} icon={<Star className="h-7 w-7" />} />
-            <MetricCard label="Regular Companies" value={regular.length} icon={<FileText className="h-7 w-7" />} />
+        <section className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4 sm:mb-6">Intelligence at a Glance</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+            <MetricCard label="Total Companies" value={stats.total} icon={<Building2 className="h-6 w-6 sm:h-7 sm:w-7" />} />
+            <MetricCard label="Marquee Companies" value={marquee.length} icon={<Crown className="h-6 w-6 sm:h-7 sm:w-7" />} />
+            <MetricCard label="Super Dream Companies" value={superDream.length} icon={<Rocket className="h-6 w-6 sm:h-7 sm:w-7" />} />
+            <MetricCard label="Dream Companies" value={dream.length} icon={<Star className="h-6 w-6 sm:h-7 sm:w-7" />} />
+            <MetricCard label="Regular Companies" value={regular.length} icon={<FileText className="h-6 w-6 sm:h-7 sm:w-7" />} />
           </div>
 
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-4 sm:mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             <MetricCard
               label="Average Growth Rate"
               value={`${stats.avgGrowth}%`}
-              icon={<LineChart className="h-7 w-7" />}
+              icon={<LineChart className="h-6 w-6 sm:h-7 sm:w-7" />}
               trend="up"
               trendValue="+2.5% YoY"
             />
             <MetricCard
               label="Highest Growth"
               value={`${stats.maxGrowth}%`}
-              icon={<Flame className="h-7 w-7" />}
+              icon={<Flame className="h-6 w-6 sm:h-7 sm:w-7" />}
               description="Peak company performance"
             />
             <MetricCard
               label="Countries Covered"
               value="50+"
-              icon={<Globe className="h-7 w-7" />}
+              icon={<Globe className="h-6 w-6 sm:h-7 sm:w-7" />}
               description="Global placement opportunities"
             />
           </div>
         </section>
 
         {/* Company Categories Overview */}
-        <section className="px-8 py-8 space-y-6">
+        <section className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Marquee Companies</h3>
-            <p className="text-sm text-slate-600 mb-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">Marquee Companies</h3>
+            <p className="text-xs sm:text-sm text-slate-600 mb-3 sm:mb-4">
               Industry leaders with massive workforce and global presence
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {marquee.map((company) => (
                 <CompanyQuickCard key={company.id} company={company} onSelect={handleSearch} />
               ))}
@@ -98,11 +98,11 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Super Dream Companies</h3>
-            <p className="text-sm text-slate-600 mb-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">Super Dream Companies</h3>
+            <p className="text-xs sm:text-sm text-slate-600 mb-3 sm:mb-4">
               High-growth companies with exceptional expansion (growth rate {'>'}15%)
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {superDream.map((company) => (
                 <CompanyQuickCard key={company.id} company={company} onSelect={handleSearch} />
               ))}
@@ -111,22 +111,22 @@ export default function Dashboard() {
         </section>
 
         {/* Footer Section */}
-        <section className="bg-slate-100 px-8 py-12">
+        <section className="bg-slate-100 px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
           <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Ready to Explore?</h3>
-            <p className="text-slate-600 mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">Ready to Explore?</h3>
+            <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 px-2">
               Visit our All Companies section to discover detailed insights about each organization or use Skill Set Analytics to compare across companies.
             </p>
-            <div className="flex gap-4 justify-center flex-wrap">
+            <div className="flex gap-3 sm:gap-4 justify-center flex-wrap">
               <button
                 onClick={() => router.push('/companies')}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base touch-manipulation"
               >
                 Explore All Companies
               </button>
               <button
                 onClick={() => router.push('/analytics')}
-                className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 transition-colors"
+                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-white text-blue-600 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 transition-colors text-sm sm:text-base touch-manipulation"
               >
                 Skill Analytics
               </button>
@@ -153,10 +153,10 @@ const CompanyQuickCard: React.FC<CompanyQuickCardProps> = ({ company, onSelect }
   return (
     <button
       onClick={() => onSelect(company.id)}
-      className="bg-white rounded-xl border border-slate-200 p-4 text-left hover:shadow-lg hover:border-blue-300 transition-all duration-300 group"
+      className="bg-white rounded-lg sm:rounded-xl border border-slate-200 p-3 sm:p-4 text-left hover:shadow-lg hover:border-blue-300 transition-all duration-300 group touch-manipulation"
     >
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
           {imageError ? (
             <div className={`w-full h-full ${bgColor} flex items-center justify-center rounded-lg`}>
               <span className="text-white font-bold text-xs">{initials}</span>
@@ -167,18 +167,18 @@ const CompanyQuickCard: React.FC<CompanyQuickCardProps> = ({ company, onSelect }
               <img
                 src={company.logo_url}
                 alt={company.name}
-                className="w-10 h-10 object-contain"
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
                 onError={() => setImageError(true)}
               />
             </>
           )}
         </div>
-        <div>
-          <p className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{company.name}</p>
-          <p className="text-xs text-slate-600">{company.category}</p>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-sm sm:text-base text-slate-900 group-hover:text-blue-600 transition-colors truncate">{company.name}</p>
+          <p className="text-xs text-slate-600 truncate">{company.category}</p>
         </div>
       </div>
-      <p className="text-sm text-slate-600 mb-2">{company.employee_size}</p>
+      <p className="text-xs sm:text-sm text-slate-600 mb-1.5 sm:mb-2 truncate">{company.employee_size}</p>
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold text-green-600">{company.yoy_growth_rate}%</span>
         <span className="text-xs text-slate-600">YoY growth</span>

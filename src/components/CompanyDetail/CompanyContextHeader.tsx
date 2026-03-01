@@ -60,7 +60,7 @@ export default function CompanyContextHeader({ company, active }: CompanyContext
         </div>
 
         {companyId && (
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap justify-center lg:justify-start">
             <Link
               href={`/companies/${companyId}/skills`}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${

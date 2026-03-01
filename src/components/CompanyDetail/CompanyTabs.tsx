@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Brain,
   Briefcase,
@@ -9,9 +10,21 @@ import {
   Target,
   Users,
   Wallet,
+  MapPin,
+  Building2,
+  TrendingUp,
+  Globe,
+  Award,
+  Code,
+  Zap,
+  Heart,
+  Lightbulb,
+  BookOpen,
+  AlertTriangle,
 } from 'lucide-react';
 import { Tabs, Chip } from '../UI';
 import { CompanyFull, BLOOM_LEVELS, generateMockSkills, getBloomDescription } from '@/utils/data';
+import hiringRoundsMaster from '@/data/Hiring_rounds.json';
 
 interface CompanyTabsProps {
   company: CompanyFull;
@@ -22,6 +35,13 @@ interface CompanyTabsProps {
 export default function CompanyTabs({ company, activeTab, onTabChange }: CompanyTabsProps) {
   const [selectedSkills, setSelectedSkills] = useState<(typeof BLOOM_LEVELS)[number]>('CU');
   const mockSkills = generateMockSkills();
+  
+  // Get hiring data for this company
+  const hiringData = (hiringRoundsMaster as any[]).find(
+    (entry) => 
+      entry.company_name === company.name || 
+      entry.company_name === company.short_name
+  );
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: <ClipboardList className="h-4 w-4" /> },
@@ -32,7 +52,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
     { id: 'culture', label: 'Culture & Work Life', icon: <Leaf className="h-4 w-4" /> },
     { id: 'risk', label: 'Risk & ESG', icon: <Shield className="h-4 w-4" /> },
     { id: 'strategy', label: 'Strategy', icon: <Target className="h-4 w-4" /> },
-    { id: 'skills', label: 'Skills (Bloom Taxonomy)', icon: <Brain className="h-4 w-4" /> },
+    { id: 'skills', label: 'Skills & Hiring', icon: <Brain className="h-4 w-4" /> },
   ];
 
   const renderTabContent = () => {
@@ -40,239 +60,618 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
       case 'overview':
         return (
           <div className="space-y-6">
-            <Section title="Company Overview">
-              <InfoGrid
-                data={{
-                  'Founded': company.founded_year?.toString(),
-                  'Headquarters': company.headquarters,
-                  'Company Stage': company.company_stage,
-                  'Industry': company.industry_segment,
-                  'Sub-segment': company.sub_segment,
-                  'Business Model': company.business_model,
-                }}
-              />
-            </Section>
-
-            {company.acquisition_history && (
-              <Section title="Acquisitions">
-                <p className="text-slate-700">{company.acquisition_history}</p>
+            {/* Company Overview Text */}
+            {company.overview_text && (
+              <Section title="About the Company" icon={<Building2 className="h-5 w-5" />}>
+                <p className="text-slate-700 leading-relaxed">{company.overview_text}</p>
               </Section>
             )}
 
-            <Section title="Geographic Presence">
+            {/* Vision, Mission, Values */}
+            {(company.vision_statement || company.mission_statement || company.core_values) && (
+              <Section title="Vision, Mission & Values" icon={<Target className="h-5 w-5" />}>
+                {company.vision_statement && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-slate-900 mb-2">Vision</h4>
+                    <p className="text-slate-700">{company.vision_statement}</p>
+                  </div>
+                )}
+                {company.mission_statement && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-slate-900 mb-2">Mission</h4>
+                    <p className="text-slate-700">{company.mission_statement}</p>
+                  </div>
+                )}
+                {company.core_values && (
+                  <div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Core Values</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {company.core_values.split(';').map((value: string) => (
+                        <Chip key={value.trim()} label={value.trim()} variant="accent" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Section>
+            )}
+
+            {/* Company Information */}
+            <Section title="Company Information" icon={<ClipboardList className="h-5 w-5" />}>
               <InfoGrid
                 data={{
-                  'Geographic Coverage': company.geographic_presence,
-                  'Regional HQs': company.regional_hq,
+                  'Founded': company.incorporation_year?.toString(),
+                  'Headquarters': company.headquarters_address,
+                  'Nature': company.nature_of_company,
+                  'Employee Size': company.employee_size,
+                  'Office Count': company.office_count,
+                  'Operating Countries': company.operating_countries,
                 }}
               />
             </Section>
+
+            {/* Unique Differentiators */}
+            {company.unique_differentiators && (
+              <Section title="Unique Differentiators" icon={<Award className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.unique_differentiators.split(';').map((diff: string) => (
+                    <Chip key={diff.trim()} label={diff.trim()} variant="accent" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Company History */}
+            {(company.history_timeline || company.recent_news) && (
+              <Section title="Company History & Recent News" icon={<BookOpen className="h-5 w-5" />}>
+                {company.history_timeline && (
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      {company.history_timeline.split(';').map((item: string, idx: number) => (
+                        <Chip key={idx} label={item.trim()} variant="secondary" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {company.recent_news && (
+                  <div className="space-y-2">
+                    {company.recent_news.split(';').map((news: string, idx: number) => (
+                      <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                        <p className="text-sm text-slate-700">{news.trim()}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Section>
+            )}
+
+            {/* Awards & Recognition */}
+            {company.awards_recognitions && (
+              <Section title="Awards & Recognition" icon={<Award className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.awards_recognitions.split(';').map((award: string) => (
+                    <Chip key={award.trim()} label={award.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
           </div>
         );
 
       case 'business':
         return (
           <div className="space-y-6">
-            <Section title="Market Information">
+            {/* Market Overview */}
+            <Section title="Market Overview" icon={<Globe className="h-5 w-5" />}>
               <InfoGrid
                 data={{
-                  'Key Markets': company.key_markets,
-                  'Customer Base': company.customer_base_size?.toString(),
-                  'Competitive Advantages': company.competitive_advantages,
+                  'TAM': company.tam,
+                  'SAM': company.sam,
+                  'SOM': company.som,
+                  'Market Share': company.market_share_percentage,
+                  'Focus Sectors': company.focus_sectors,
                 }}
               />
             </Section>
 
-            {company.product_portfolio_count && (
-              <Section title="Product Portfolio">
+            {/* Competitive Landscape */}
+            <Section title="Competitive Landscape" icon={<TrendingUp className="h-5 w-5" />}>
+              {company.competitive_advantages && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-900 mb-2">Competitive Advantages</h4>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {company.competitive_advantages.split(';').map((advantage: string) => (
+                      <Chip key={advantage.trim()} label={advantage.trim()} variant="primary" />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {company.key_competitors && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-900 mb-2">Key Competitors</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {company.key_competitors.split(';').map((competitor: string) => (
+                      <Chip key={competitor.trim()} label={competitor.trim()} variant="secondary" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(company.weaknesses_gaps || company.key_challenges_needs) && (
                 <InfoGrid
                   data={{
-                    'Total Products': company.product_portfolio_count.toString(),
-                    'Flagship Products': company.flagship_products,
-                    'Recent Launches': company.recent_launches,
-                    'Development Cycle': company.product_development_cycle,
+                    'Weaknesses': company.weaknesses_gaps,
+                    'Key Challenges': company.key_challenges_needs,
+                  }}
+                />
+              )}
+            </Section>
+
+            {/* Customers & Value Proposition */}
+            <Section title="Customers & Value Proposition" icon={<Heart className="h-5 w-5" />}>
+              {company.top_customers && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-900 mb-2">Top Customers</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {company.top_customers.split(';').map((customer: string) => (
+                      <Chip key={customer.trim()} label={customer.trim()} variant="accent" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {company.core_value_proposition && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-slate-900 mb-2">Value Proposition</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {company.core_value_proposition.split(';').map((prop: string) => (
+                      <Chip key={prop.trim()} label={prop.trim()} variant="primary" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {company.pain_points_addressed && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-900 mb-2">Pain Points Addressed</h4>
+                  <ul className="list-disc list-inside space-y-1 text-slate-700">
+                    {company.pain_points_addressed.split(';').map((pain: string) => (
+                      <li key={pain.trim()}>{pain.trim()}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <InfoGrid
+                data={{
+                  'Net Promoter Score': company.net_promoter_score?.toString(),
+                  'Churn Rate': company.churn_rate,
+                  'Customer Lifetime Value': company.customer_lifetime_value,
+                  'Customer Acquisition Cost': company.customer_acquisition_cost,
+                }}
+              />
+            </Section>
+
+            {/* Products & Offerings */}
+            {company.offerings_description && (
+              <Section title="Products & Offerings" icon={<Briefcase className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {company.offerings_description.split(';').map((offering: string) => (
+                    <Chip key={offering.trim()} label={offering.trim()} variant="primary" />
+                  ))}
+                </div>
+                
+                {company.product_pipeline && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-slate-900 mb-2">Product Pipeline</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {company.product_pipeline.split(';').map((product: string) => (
+                        <Chip key={product.trim()} label={product.trim()} variant="accent" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Section>
+            )}
+
+            {/* Go-To-Market Strategy */}
+            {(company.go_to_market_strategy || company.sales_motion) && (
+              <Section title="Go-To-Market Strategy" icon={<Target className="h-5 w-5" />}>
+                <InfoGrid
+                  data={{
+                    'Sales Motion': company.sales_motion,
+                    'GTM Strategy': company.go_to_market_strategy,
+                    'CAC:LTV Ratio': company.cac_ltv_ratio,
                   }}
                 />
               </Section>
             )}
-
-            <Section title="Customer Metrics">
-              <InfoGrid
-                data={{
-                  'Net Promoter Score': company.net_promoter_score?.toString(),
-                  'Customer Retention': `${company.customer_retention_rate}%`,
-                  'Satisfaction Score': company.customer_satisfaction_score?.toString(),
-                }}
-              />
-            </Section>
           </div>
         );
 
       case 'leadership':
         return (
           <div className="space-y-6">
-            <Section title="Executive Leadership">
-              <InfoGrid
-                data={{
-                  'CEO': company.ceo_name,
-                  'CFO': company.cfo_name,
-                  'CTO': company.cto_name,
-                  'Board Members': company.board_members?.toString(),
-                }}
-              />
+            {/* Executive Leadership */}
+            <Section title="Executive Leadership" icon={<Users className="h-5 w-5" />}>
+              <div className="space-y-4">
+                {company.ceo_name && (
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-slate-900 mb-2">Chief Executive Officer</h4>
+                    <p className="text-slate-900 font-medium text-lg">{company.ceo_name}</p>
+                    {company.ceo_linkedin_url && (
+                      <a href={company.ceo_linkedin_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                        LinkedIn Profile
+                      </a>
+                    )}
+                  </div>
+                )}
+                
+                <InfoGrid
+                  data={{
+                    'CFO': company.cfo_name,
+                    'CTO': company.cto_name,
+                    'COO': company.coo_name,
+                  }}
+                />
+              </div>
             </Section>
 
-            {company.key_executives && (
-              <Section title="Key Executives">
-                <p className="text-slate-700">{company.key_executives}</p>
+            {/* Key Leaders */}
+            {company.key_leaders && (
+              <Section title="Key Leaders" icon={<Award className="h-5 w-5" />}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {company.key_leaders.split(';').map((leader: string, idx: number) => {
+                    const [name, title] = leader.split(',').map((s: string) => s.trim());
+                    return (
+                      <div key={idx} className="bg-white border border-slate-200 rounded-lg p-3">
+                        <p className="font-semibold text-slate-900">{name}</p>
+                        <p className="text-sm text-slate-600">{title}</p>
+                      </div>
+                    );
+                  })}
+                </div>
               </Section>
             )}
 
-            <Section title="Governance">
+            {/* Board Members */}
+            {company.board_members && (
+              <Section title="Board of Directors" icon={<Building2 className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.board_members.split(';').map((member: string) => (
+                    <Chip key={member.trim()} label={member.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Contact Information */}
+            <Section title="Contact Information" icon={<Globe className="h-5 w-5" />}>
               <InfoGrid
                 data={{
-                  'Organizational Structure': company.organizational_structure,
-                  'Corporate Governance': company.corporate_governance,
-                  'Decision Making': company.decision_making_process,
+                  'Primary Contact': company.contact_person_name,
+                  'Contact Title': company.contact_person_title,
+                  'Email': company.primary_contact_email || company.contact_person_email,
+                  'Phone': company.primary_phone_number || company.contact_person_phone,
                 }}
               />
             </Section>
+
+            {/* Warm Intro Pathways */}
+            {(company.warm_intro_pathways || company.decision_maker_access) && (
+              <Section title="Access & Networking" icon={<Target className="h-5 w-5" />}>
+                <InfoGrid
+                  data={{
+                    'Warm Intro Pathways': company.warm_intro_pathways,
+                    'Decision Maker Access': company.decision_maker_access,
+                  }}
+                />
+              </Section>
+            )}
           </div>
         );
 
       case 'financials':
         return (
           <div className="space-y-6">
-            <Section title="Financial Overview">
+            {/* Financial Snapshot */}
+            <Section title="Financial Snapshot" icon={<TrendingUp className="h-5 w-5" />}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-green-700 mb-1">Revenue</p>
+                  <p className="text-xl font-bold text-green-900">{company.annual_revenue || 'N/A'}</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-blue-700 mb-1">Profit</p>
+                  <p className="text-xl font-bold text-blue-900">{company.annual_profit || 'N/A'}</p>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-purple-700 mb-1">Valuation</p>
+                  <p className="text-xl font-bold text-purple-900">{company.valuation || 'N/A'}</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-orange-700 mb-1">YoY Growth</p>
+                  <p className="text-xl font-bold text-orange-900">{company.yoy_growth_rate}%</p>
+                </div>
+              </div>
+
               <InfoGrid
                 data={{
-                  'Market Cap': company.market_cap_usd
-                    ? `$${(parseInt(company.market_cap_usd) / 1000000000000).toFixed(1)}T`
-                    : 'N/A',
-                  'Revenue': company.revenue_usd
-                    ? `$${(parseInt(company.revenue_usd) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
-                  'Profitability': company.profitability_status,
-                  'Financial Health': company.financial_health,
+                  'Profitability Status': company.profitability_status,
+                  'Market Share': company.market_share_percentage,
                 }}
               />
             </Section>
 
-            <Section title="Financial Metrics">
-              <InfoGrid
-                data={{
-                  'Operating Margin': `${company.operating_margin}%`,
-                  'Net Profit Margin': `${company.net_profit_margin}%`,
-                  'Debt-to-Equity': company.debt_equity_ratio?.toString(),
-                  'Cash Reserves': company.cash_reserves_usd
-                    ? `$${(parseInt(company.cash_reserves_usd) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
-                }}
-              />
-            </Section>
+            {/* Revenue Mix */}
+            {company.revenue_mix && (
+              <Section title="Revenue Mix" icon={<Wallet className="h-5 w-5" />}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {company.revenue_mix.split(';').map((mix: string) => {
+                    const parts = mix.split(':');
+                    if (parts.length === 2) {
+                      const [source, percentage] = parts.map((s: string) => s.trim());
+                      return (
+                        <div key={source} className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-semibold text-slate-900">{source}</p>
+                            <p className="text-lg font-bold text-blue-600">{percentage}</p>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
+                              style={{ width: percentage }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              </Section>
+            )}
 
-            <Section title="Investment & Spending">
-              <InfoGrid
-                data={{
-                  'R&D Spending': company.research_development_spending
-                    ? `$${(parseInt(company.research_development_spending) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
-                  'CapEx': company.capital_expenditure
-                    ? `$${(parseInt(company.capital_expenditure) / 1000000000).toFixed(1)}B`
-                    : 'N/A',
-                  'Credit Rating': company.credit_rating,
-                }}
-              />
-            </Section>
+            {/* Investors */}
+            {company.key_investors && (
+              <Section title="Key Investors" icon={<Users className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.key_investors.split(';').map((investor: string) => (
+                    <Chip key={investor.trim()} label={investor.trim()} variant="accent" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Burn & Runway */}
+            {(company.burn_rate || company.runway_months) && (
+              <Section title="Burn Rate & Runway" icon={<AlertTriangle className="h-5 w-5" />}>
+                <InfoGrid
+                  data={{
+                    'Burn Rate': company.burn_rate,
+                    'Runway': company.runway_months,
+                    'Burn Multiplier': company.burn_multiplier,
+                  }}
+                />
+              </Section>
+            )}
+
+            {/* R&D Investment */}
+            {company.r_and_d_investment && (
+              <Section title="R&D Investment" icon={<Zap className="h-5 w-5" />}>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <p className="text-lg font-bold text-purple-900">{company.r_and_d_investment}</p>
+                  <p className="text-sm text-purple-700">Annual R&D Spending</p>
+                </div>
+              </Section>
+            )}
           </div>
         );
 
       case 'technology':
         return (
           <div className="space-y-6">
-            <Section title="Technology Stack">
-              {company.technical_stack && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {company.technical_stack.split(';').map((tech: string) => (
+            {/* Tech Stack */}
+            {company.tech_stack && (
+              <Section title="Technology Stack" icon={<Code className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.tech_stack.split(';').map((tech: string) => (
                     <Chip key={tech.trim()} label={tech.trim()} variant="primary" />
                   ))}
                 </div>
+              </Section>
+            )}
+
+            {/* AI/ML Capabilities */}
+            <Section title="AI & Machine Learning" icon={<Zap className="h-5 w-5" />}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-blue-700 mb-1">AI Adoption Level</p>
+                  <p className="text-lg font-bold text-blue-900">{company.ai_adoption_level || 'N/A'}</p>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-purple-700 mb-1">AI Maturity Stage</p>
+                  <p className="text-lg font-bold text-purple-900">{company.ai_maturity_stage || 'N/A'}</p>
+                </div>
+              </div>
+
+              {company.ml_frameworks && (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-slate-700 mb-2">ML Frameworks</p>
+                  <div className="flex flex-wrap gap-2">
+                    {company.ml_frameworks.split(';').map((framework: string) => (
+                      <Chip key={framework.trim()} label={framework.trim()} variant="accent" />
+                    ))}
+                  </div>
+                </div>
               )}
+
               <InfoGrid
                 data={{
-                  'Data Infrastructure': company.data_infrastructure,
-                  'ML Frameworks': company.ml_frameworks_used,
-                  'DevOps Tools': company.devops_tools,
-                  'Database Tech': company.database_technologies,
+                  'AI Use Cases': company.ai_use_cases,
+                  'Automation Tools': company.automation_tools,
                 }}
               />
             </Section>
 
-            <Section title="Innovation">
-              <InfoGrid
-                data={{
-                  'Innovation Labs': company.innovation_labs,
-                  'AI Capability': company.ai_capability_level,
-                  'Patent Portfolio': company.patent_portfolio,
-                  'Annual Publications': company.research_publications,
-                }}
-              />
-            </Section>
+            {/* Data Infrastructure */}
+            {company.data_infrastructure && (
+              <Section title="Data Infrastructure" icon={<Building2 className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.data_infrastructure.split(';').map((infra: string) => (
+                    <Chip key={infra.trim()} label={infra.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
 
-            <Section title="Emerging Technologies">
-              <InfoGrid
-                data={{
-                  'Blockchain': company.blockchain_initiatives || 'No active initiatives',
-                  'Quantum Computing': company.quantum_computing_involvement || 'Limited involvement',
-                  'IoT': company.iot_ecosystem || 'No IoT focus',
-                  'AR/VR': company.ar_vr_investments || 'No AR/VR investments',
-                }}
-              />
-            </Section>
+            {/* Cybersecurity */}
+            {company.cyber_security_posture && (
+              <Section title="Cybersecurity" icon={<Shield className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.cyber_security_posture.split(';').map((sec: string) => (
+                    <Chip key={sec.trim()} label={sec.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Patents & IP */}
+            {company.patents && (
+              <Section title="Patents & Intellectual Property" icon={<Award className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.patents.split(';').map((patent: string) => (
+                    <Chip key={patent.trim()} label={patent.trim()} variant="accent" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Technology Partnerships */}
+            {company.technology_partnerships && (
+              <Section title="Technology Partnerships" icon={<Globe className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.technology_partnerships.split(';').map((partner: string) => (
+                    <Chip key={partner.trim()} label={partner.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* R&D Investment */}
+            {company.r_and_d_investment && (
+              <Section title="Research & Development" icon={<Lightbulb className="h-5 w-5" />}>
+                <InfoGrid
+                  data={{
+                    'R&D Investment': company.r_and_d_investment,
+                    'R&D Focus Areas': company.r_and_d_focus_areas,
+                  }}
+                />
+              </Section>
+            )}
           </div>
         );
 
       case 'culture':
         return (
           <div className="space-y-6">
-            <Section title="Workforce">
-              <InfoGrid
-                data={{
-                  'Employee Size': company.employee_size,
-                  'Hiring Plans 2024': company.hiring_plans_2024,
-                  'Attrition Rate': `${company.attrition_rate}%`,
-                  'Satisfaction Score': company.employee_satisfaction_score?.toString(),
-                }}
-              />
+            {/* Workforce Metrics */}
+            <Section title="Workforce Metrics" icon={<Users className="h-5 w-5" />}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-blue-700 mb-1">Employee Count</p>
+                  <p className="text-xl font-bold text-blue-900">{company.employee_size || 'N/A'}</p>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-green-700 mb-1">Avg Retention Tenure</p>
+                  <p className="text-xl font-bold text-green-900">{company.avg_retention_tenure || 'N/A'}</p>
+                </div>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-orange-700 mb-1">Employee Turnover</p>
+                  <p className="text-xl font-bold text-orange-900">{company.employee_turnover || 'N/A'}</p>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-purple-700 mb-1">Hiring Velocity</p>
+                  <p className="text-sm font-bold text-purple-900">{company.hiring_velocity || 'N/A'}</p>
+                </div>
+              </div>
             </Section>
 
-            <Section title="Work Culture">
-              <InfoGrid
-                data={{
-                  'Workplace Culture': company.workplace_culture,
-                  'Remote Work Policy': company.remote_work_policy,
-                  'Office Amenities': company.office_amenities,
-                }}
-              />
-            </Section>
+            {/* Work Culture */}
+            {company.work_culture && (
+              <Section title="Work Culture" icon={<Heart className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.work_culture.split(';').map((culture: string) => (
+                    <Chip key={culture.trim()} label={culture.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
 
-            <Section title="Diversity & Inclusion">
-              <InfoGrid
-                data={{
-                  'Women %': company.diversity_metrics?.match(/(\d+)%\s*women/)?.[1] + '%' || 'N/A',
-                  'Underrepresented Minorities': company.diversity_metrics
-                    ?.match(/(\d+)%\s*underrepresented/)?.[1] + '%' || 'N/A',
-                }}
-              />
-            </Section>
+            {/* DEI Initiatives */}
+            {company.dei_initiatives && (
+              <Section title="Diversity, Equity & Inclusion" icon={<Award className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.dei_initiatives.split(';').map((initiative: string) => (
+                    <Chip key={initiative.trim()} label={initiative.trim()} variant="accent" />
+                  ))}
+                </div>
+                {company.diversity_metrics && (
+                  <div className="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-slate-700 mb-2">Diversity Metrics</p>
+                    <div className="flex flex-wrap gap-2">
+                      {company.diversity_metrics.split(';').map((metric: string) => (
+                        <Chip key={metric.trim()} label={metric.trim()} variant="secondary" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Section>
+            )}
 
-            <Section title="Benefits & Development">
-              <p className="text-slate-700 mb-3">{company.employee_benefits}</p>
+            {/* Learning & Development */}
+            {company.learning_development_programs && (
+              <Section title="Learning & Development" icon={<Lightbulb className="h-5 w-5" />}>
+                <div className="space-y-3">
+                  {company.learning_development_programs.split(';').map((program: string) => (
+                    <div key={program.trim()} className="bg-white border border-slate-200 rounded-lg p-3">
+                      <p className="text-slate-800">{program.trim()}</p>
+                    </div>
+                  ))}
+                </div>
+                <InfoGrid
+                  data={{
+                    'Training Budget': company.training_budget_per_employee,
+                    'Mentorship Program': company.mentorship_program,
+                  }}
+                />
+              </Section>
+            )}
+
+            {/* Benefits & Compensation */}
+            {company.employee_benefits && (
+              <Section title="Benefits & Compensation" icon={<Wallet className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {company.employee_benefits.split(';').map((benefit: string) => (
+                    <Chip key={benefit.trim()} label={benefit.trim()} variant="primary" />
+                  ))}
+                </div>
+                <InfoGrid
+                  data={{
+                    'Compensation Philosophy': company.compensation_philosophy,
+                    'Performance Bonus': company.performance_bonus_structure,
+                  }}
+                />
+              </Section>
+            )}
+
+            {/* Work Environment */}
+            <Section title="Work Environment" icon={<MapPin className="h-5 w-5" />}>
               <InfoGrid
                 data={{
-                  'Training Programs': company.training_programs,
-                  'Skill Development Budget': company.skill_development_budget,
-                  'Mentorship': company.mentorship_programs,
+                  'Work Model': company.hybrid_remote_policy,
+                  'Office Locations': company.office_locations,
+                  'Workplace Safety': company.workplace_safety_record,
                 }}
               />
             </Section>
@@ -282,128 +681,349 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
       case 'risk':
         return (
           <div className="space-y-6">
-            <Section title="Risk & Compliance">
-              <InfoGrid
-                data={{
-                  'Risk Management': company.risk_management_framework,
-                  'Compliance Certifications': company.compliance_certifications,
-                  'Cybersecurity Measures': company.cybersecurity_measures,
-                  'Data Privacy': company.data_privacy_policy,
-                }}
-              />
-            </Section>
-
-            {company.crisis_history && (
-              <Section title="Crisis History">
-                <p className="text-slate-700">{company.crisis_history}</p>
+            {/* ESG Ratings */}
+            {company.esg_ratings && (
+              <Section title="ESG Commitment" icon={<Leaf className="h-5 w-5" />}>
+                <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+                  <div className="flex flex-wrap gap-2">
+                    {company.esg_ratings.split(';').map((rating: string) => (
+                      <Chip key={rating.trim()} label={rating.trim()} variant="accent" />
+                    ))}
+                  </div>
+                </div>
               </Section>
             )}
 
-            <Section title="Environmental & Social">
+            {/* Sustainability Goals */}
+            {company.sustainability_goals && (
+              <Section title="Sustainability Goals" icon={<Target className="h-5 w-5" />}>
+                <div className="space-y-3">
+                  {company.sustainability_goals.split(';').map((goal: string) => (
+                    <div key={goal.trim()} className="bg-white border border-slate-200 rounded-lg p-3 flex items-start gap-3">
+                      <div className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 mt-2" />
+                      <p className="text-slate-800">{goal.trim()}</p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Environmental Commitment */}
+            {company.environmental_commitment && (
+              <Section title="Environmental Commitment" icon={<Leaf className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.environmental_commitment.split(';').map((commitment: string) => (
+                    <Chip key={commitment.trim()} label={commitment.trim()} variant="accent" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Risk Management */}
+            <Section title="Risk Management" icon={<Shield className="h-5 w-5" />}>
               <InfoGrid
                 data={{
-                  'ESG Rating': company.esg_rating,
-                  'Sustainability Goals': company.sustainability_goals,
-                  'Environmental Commitment': company.environmental_commitment,
-                  'Social Initiatives': company.social_initiatives,
+                  'Cybersecurity Posture': company.cybersecurity_posture,
+                  'Geopolitical Risks': company.geopolitical_risks,
+                  'Macro Risks': company.macro_risks,
+                  'Supply Chain Dependencies': company.supply_chain_dependencies,
                 }}
               />
             </Section>
 
-            <Section title="Regulatory Challenges">
-              <p className="text-slate-700">{company.regulatory_challenges || 'Standard regulatory compliance'}</p>
-            </Section>
+            {/* Compliance & Certifications */}
+            {company.compliance_certifications && (
+              <Section title="Compliance & Certifications" icon={<Award className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.compliance_certifications.split(';').map((cert: string) => (
+                    <Chip key={cert.trim()} label={cert.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Cybersecurity */}
+            {company.cyber_security_posture && (
+              <Section title="Cybersecurity Posture" icon={<Shield className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.cyber_security_posture.split(';').map((sec: string) => (
+                    <Chip key={sec.trim()} label={sec.trim()} variant="primary" />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Crisis History */}
+            {company.crisis_history && (
+              <Section title="Crisis Management History" icon={<AlertTriangle className="h-5 w-5" />}>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {company.crisis_history.split(';').map((crisis: string, idx: number) => (
+                      <Chip key={idx} label={crisis.trim()} variant="secondary" />
+                    ))}
+                  </div>
+                </div>
+              </Section>
+            )}
+
+            {/* Supply Chain */}
+            {company.supply_chain_dependencies && (
+              <Section title="Supply Chain Dependencies" icon={<Globe className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.supply_chain_dependencies.split(';').map((dep: string) => (
+                    <Chip key={dep.trim()} label={dep.trim()} variant="accent" />
+                  ))}
+                </div>
+              </Section>
+            )}
           </div>
         );
 
       case 'strategy':
         return (
           <div className="space-y-6">
-            <Section title="Strategic Direction">
+            {/* Strategic Vision */}
+            {company['5_year_vision'] && (
+              <Section title="5-Year Vision" icon={<Target className="h-5 w-5" />}>
+                <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
+                  <p className="text-slate-900 text-lg leading-relaxed">{company['5_year_vision']}</p>
+                </div>
+              </Section>
+            )}
+
+            {/* Strategic Priorities */}
+            {company.strategic_priorities && (
+              <Section title="Strategic Priorities" icon={<Briefcase className="h-5 w-5" />}>
+                <div className="space-y-3">
+                  {company.strategic_priorities.split(';').map((priority: string, idx: number) => (
+                    <div key={idx} className="bg-white border border-slate-200 rounded-lg p-4 flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                        {idx + 1}
+                      </div>
+                      <p className="text-slate-800 flex-1 pt-1">{priority.trim()}</p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Growth Strategy */}
+            <Section title="Growth Trajectory" icon={<TrendingUp className="h-5 w-5" />}>
               <InfoGrid
                 data={{
                   'Growth Trajectory': company.growth_trajectory,
-                  'Strategic Focus Areas': company.strategic_focus_areas,
-                  '5-Year Vision': company['5_year_vision'],
                   'Future Outlook': company.future_outlook,
+                  'Market Expansion': company.market_expansion_plans,
                 }}
               />
             </Section>
 
-            <Section title="Market Position">
-              <InfoGrid
-                data={{
-                  'Competitive Threats': company.competitive_threats,
-                  'Market Opportunities': company.market_opportunities,
-                  'Market Expansion Plans': company.market_expansion_plans,
-                }}
-              />
-            </Section>
+            {/* Innovation Roadmap */}
+            {company.innovation_roadmap && (
+              <Section title="Innovation Roadmap" icon={<Lightbulb className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2">
+                  {company.innovation_roadmap.split(';').map((item: string) => (
+                    <Chip key={item.trim()} label={item.trim()} variant="accent" />
+                  ))}
+                </div>
+              </Section>
+            )}
 
-            <Section title="Innovation Strategy">
-              <p className="text-slate-700">{company.innovation_strategy}</p>
-            </Section>
+            {/* Market Opportunities */}
+            {company.market_opportunities && (
+              <Section title="Market Opportunities" icon={<Globe className="h-5 w-5" />}>
+                <div className="space-y-2">
+                  {company.market_opportunities.split(';').map((opp: string) => (
+                    <div key={opp.trim()} className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <p className="text-slate-800">{opp.trim()}</p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
 
-            <Section title="Partnerships & Growth">
-              <InfoGrid
-                data={{
-                  'Strategic Partnerships': company.strategic_partnerships,
-                  'Joint Ventures': company.joint_ventures,
-                  'Partnership Opportunities': company.partnership_opportunities,
-                }}
-              />
-            </Section>
+            {/* Competitive Threats */}
+            {company.competitive_threats && (
+              <Section title="Competitive Threats" icon={<AlertTriangle className="h-5 w-5" />}>
+                <div className="space-y-2">
+                  {company.competitive_threats.split(';').map((threat: string) => (
+                    <div key={threat.trim()} className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                      <p className="text-slate-800">{threat.trim()}</p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Strategic Partnerships */}
+            {company.strategic_partnerships && (
+              <Section title="Strategic Partnerships & Ecosystem" icon={<Users className="h-5 w-5" />}>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {company.strategic_partnerships.split(';').map((partner: string) => (
+                    <Chip key={partner.trim()} label={partner.trim()} variant="primary" />
+                  ))}
+                </div>
+                <InfoGrid
+                  data={{
+                    'Joint Ventures': company.joint_ventures,
+                    'Partnership Opportunities': company.partnership_opportunities,
+                  }}
+                />
+              </Section>
+            )}
           </div>
         );
 
       case 'skills':
+        // Parse hiring data for this company
+        const companyHiringData = hiringData?.job_role_details || [];
+        
+        // Calculate skill frequencies across all hiring rounds
+        const skillFrequencyMap = new Map<string, number>();
+        companyHiringData.forEach((role: any) => {
+          role.hiring_rounds?.forEach((round: any) => {
+            round.skill_sets?.forEach((skill: any) => {
+              const code = skill.skill_set_code;
+              skillFrequencyMap.set(code, (skillFrequencyMap.get(code) || 0) + 1);
+            });
+          });
+        });
+        
+        const sortedSkills = Array.from(skillFrequencyMap.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10);
+
         return (
           <div className="space-y-6">
-            <Section title="Bloom's Taxonomy - Skills Matrix">
-              <div className="mb-4">
-                <p className="text-sm text-slate-600 mb-3">Select Bloom Level:</p>
-                <div className="flex gap-2 flex-wrap">
-                  {BLOOM_LEVELS.map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setSelectedSkills(level)}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                        selectedSkills === level
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
-                      }`}
+            {/* Skill Frequency Analysis - TOP SECTION */}
+            {sortedSkills.length > 0 && (
+              <Section title="Top Skills in Hiring" icon={<Brain className="h-5 w-5" />}>
+                <div className="space-y-3">
+                  {sortedSkills.map(([skill, count]) => {
+                    const percentage = (count / (companyHiringData.reduce((sum: number, role: any) => sum + (role.hiring_rounds?.length || 0), 0))) * 100;
+                    return (
+                      <div key={skill} className="bg-white border border-slate-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-slate-900">{skill}</h4>
+                          <div className="text-sm font-bold text-blue-600">
+                            {count} round{count > 1 ? 's' : ''}
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all"
+                            style={{ width: `${Math.min(percentage * 2, 100)}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-slate-600 mt-1">
+                          {percentage.toFixed(1)}% of all rounds
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Section>
+            )}
+
+            {/* Job Roles Overview */}
+            {companyHiringData.length > 0 && (
+              <Section title="Active Job Roles" icon={<Briefcase className="h-5 w-5" />}>
+                <div className="space-y-4">
+                  {companyHiringData.map((role: any, idx: number) => (
+                    <Link
+                      key={idx}
+                      href={`/hiring-rounds/${encodeURIComponent(company.name)}`}
+                      className="block bg-white border border-slate-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all duration-200 cursor-pointer"
                     >
-                      {level} - {getBloomDescription(level).split(' - ')[0]}
-                    </button>
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
+                        <div>
+                          <h4 className="font-bold text-lg text-slate-900 hover:text-blue-600 transition-colors">{role.role_title}</h4>
+                          <p className="text-sm text-slate-600">
+                            {role.role_category} • {role.opportunity_type}
+                          </p>
+                        </div>
+                        <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-center">
+                          <p className="text-xs font-semibold text-green-700">
+                            {role.compensation}
+                          </p>
+                          <p className="text-lg font-bold text-green-900">
+                            ₹{(role.ctc_or_stipend / 100000).toFixed(1)}L
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-700 mb-3 line-clamp-2">
+                        {role.job_description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        <Chip label={`${role.hiring_rounds?.length || 0} Rounds`} variant="primary" />
+                        {role.benefits_summary && (
+                          <Chip label="Benefits Available" variant="accent" />
+                        )}
+                      </div>
+                    </Link>
                   ))}
                 </div>
-              </div>
+              </Section>
+            )}
 
-              <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-200">
-                <p className="text-sm text-slate-700">{getBloomDescription(selectedSkills)}</p>
-              </div>
+            {/* Hiring Rounds Breakdown */}
+            {companyHiringData.length > 0 && companyHiringData[0]?.hiring_rounds && (
+              <Section title="Hiring Process" icon={<ClipboardList className="h-5 w-5" />}>
+                <div className="space-y-4">
+                  {companyHiringData[0].hiring_rounds.map((round: any) => (
+                    <div key={round.round_number} className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                          {round.round_number}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-slate-900">{round.round_name}</h4>
+                          <p className="text-sm text-slate-600">
+                            {round.round_category} • {round.evaluation_type} • {round.assessment_mode}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="ml-11">
+                        <p className="text-xs font-semibold text-slate-700 mb-2">Skills Tested:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {round.skill_sets?.map((skill: any, idx: number) => (
+                            <Chip key={idx} label={skill.skill_set_code} variant="primary" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
 
-              <div className="space-y-3">
-                <p className="font-semibold text-slate-900 mb-4">Skills by {selectedSkills} Level:</p>
-                {Object.entries(mockSkills).map(([skill, levels]) => (
-                  <div key={skill} className="bg-white border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-slate-900">{skill}</h4>
-                      <div className="text-sm font-bold text-blue-600">Level {levels[selectedSkills]}/10</div>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all"
-                        style={{ width: `${(levels[selectedSkills] / 10) * 100}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-slate-600 mt-2">
-                      Topics: Problem Solving, Critical Thinking, Applied Knowledge
-                    </p>
+            {/* Hiring Stats Summary */}
+            {companyHiringData.length > 0 && (
+              <Section title="Hiring Summary" icon={<Target className="h-5 w-5" />}>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-blue-900">{companyHiringData.length}</p>
+                    <p className="text-xs text-blue-700">Active Roles</p>
                   </div>
-                ))}
-              </div>
-            </Section>
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-purple-900">
+                      {companyHiringData[0]?.hiring_rounds?.length || 0}
+                    </p>
+                    <p className="text-xs text-purple-700">Hiring Rounds</p>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-green-900">
+                      ₹{Math.max(...companyHiringData.map((r: any) => r.ctc_or_stipend)) / 100000}L
+                    </p>
+                    <p className="text-xs text-green-700">Max CTC</p>
+                  </div>
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-orange-900">{skillFrequencyMap.size}</p>
+                    <p className="text-xs text-orange-700">Unique Skills</p>
+                  </div>
+                </div>
+              </Section>
+            )}
           </div>
         );
 
@@ -415,7 +1035,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
   return (
     <div className="bg-white rounded-xl border border-slate-200">
       <Tabs tabs={tabs} activeTab={activeTab} onChange={onTabChange} />
-      <div className="p-6">{renderTabContent()}</div>
+      <div className="p-4 sm:p-5 lg:p-6">{renderTabContent()}</div>
     </div>
   );
 }
@@ -423,11 +1043,15 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
 interface SectionProps {
   title: string;
   children: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
-const Section: React.FC<SectionProps> = ({ title, children }) => (
+const Section: React.FC<SectionProps> = ({ title, children, icon }) => (
   <div>
-    <h3 className="text-lg font-bold text-slate-900 mb-4">{title}</h3>
+    <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4 break-words flex items-center gap-2">
+      {icon}
+      {title}
+    </h3>
     {children}
   </div>
 );
@@ -440,13 +1064,30 @@ const InfoGrid: React.FC<InfoGridProps> = ({ data }) => {
   const entries = Object.entries(data).filter(([, value]) => value !== undefined && value !== null);
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {entries.map(([key, value]) => (
-        <div key={key} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
-          <p className="text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wide">{key}</p>
-          <p className="text-sm text-slate-900 line-clamp-3">{value}</p>
-        </div>
-      ))}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      {entries.map(([key, value]) => {
+        // Check if value is a string and contains semicolons (delimiter)
+        const stringValue = String(value);
+        const hasDelimiter = typeof value === 'string' && value.includes(';');
+        
+        return (
+          <div key={key} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+            <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide break-words">{key}</p>
+            {hasDelimiter ? (
+              <div className="flex flex-wrap gap-1.5">
+                {value.split(';').map((item: string, index: number) => {
+                  const trimmedItem = item.trim();
+                  return trimmedItem ? (
+                    <Chip key={index} label={trimmedItem} variant="secondary" />
+                  ) : null;
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-900 break-words">{stringValue}</p>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

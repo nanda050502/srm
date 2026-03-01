@@ -9,13 +9,13 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ title, subtitle, action }) => {
   return (
-    <div className="border-b border-slate-200 bg-white sticky top-0 z-40 shadow-sm">
-      <div className="px-8 py-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
-          {subtitle && <p className="text-sm text-slate-600 mt-1">{subtitle}</p>}
+    <div className="border-b border-slate-200 bg-white sticky top-0 z-30 shadow-sm">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 truncate">{title}</h1>
+          {subtitle && <p className="text-xs sm:text-sm text-slate-600 mt-1">{subtitle}</p>}
         </div>
-        {action && <div>{action}</div>}
+        {action && <div className="flex-shrink-0 w-full sm:w-auto">{action}</div>}
       </div>
     </div>
   );
@@ -39,18 +39,18 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   trendValue,
 }) => {
   return (
-    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-600 mb-2">{label}</p>
-          <p className="text-3xl font-bold text-slate-900">{value}</p>
-          {description && <p className="text-xs text-slate-500 mt-2">{description}</p>}
+    <div className="bg-white rounded-xl p-4 sm:p-5 lg:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 touch-manipulation">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs sm:text-sm font-medium text-slate-600 mb-1.5 sm:mb-2">{label}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-slate-900 break-words">{value}</p>
+          {description && <p className="text-xs text-slate-500 mt-1.5 sm:mt-2">{description}</p>}
         </div>
-        <span className="text-blue-700">{icon}</span>
+        <span className="text-blue-700 flex-shrink-0">{icon}</span>
       </div>
       {trend && trendValue && (
-        <div className={`mt-4 text-sm font-semibold ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-          {trend === 'up' ? <ArrowUpRight className="inline h-4 w-4" /> : <ArrowDownRight className="inline h-4 w-4" />} {trendValue}
+        <div className={`mt-3 sm:mt-4 text-xs sm:text-sm font-semibold ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+          {trend === 'up' ? <ArrowUpRight className="inline h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <ArrowDownRight className="inline h-3.5 w-3.5 sm:h-4 sm:w-4" />} {trendValue}
         </div>
       )}
     </div>

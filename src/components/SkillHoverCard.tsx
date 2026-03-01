@@ -42,7 +42,7 @@ export default function SkillHoverCard({
   demandLabel,
   demandVariant,
 }: SkillHoverCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const ratio = count / maxCount;
 
   return (
