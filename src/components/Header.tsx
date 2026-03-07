@@ -40,13 +40,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 }) => {
   return (
     <div className="bg-white rounded-xl p-4 sm:p-5 lg:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 touch-manipulation">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm font-medium text-slate-600 mb-1.5 sm:mb-2">{label}</p>
+      <div className="flex items-start justify-between gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <p className="text-xs sm:text-sm font-medium text-slate-600 mb-1.5 sm:mb-2 truncate">{label}</p>
           <p className="text-2xl sm:text-3xl font-bold text-slate-900 break-words">{value}</p>
-          {description && <p className="text-xs text-slate-500 mt-1.5 sm:mt-2">{description}</p>}
+          {description && <p className="text-xs text-slate-500 mt-1.5 sm:mt-2 truncate">{description}</p>}
         </div>
-        <span className="text-blue-700 flex-shrink-0">{icon}</span>
+        <div className="flex-shrink-0 text-blue-700">{icon}</div>
       </div>
       {trend && trendValue && (
         <div className={`mt-3 sm:mt-4 text-xs sm:text-sm font-semibold ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>

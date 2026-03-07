@@ -115,6 +115,28 @@ export const getStatistics = (companies: (CompanyShort & { id: string })[]) => {
   };
 };
 
+export const formatPercentage = (value: string | number): string => {
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return 'N/A';
+    return `${value}%`;
+  }
+
+  const normalized = value.toString().trim();
+  if (!normalized) return '0%';
+
+  const lower = normalized.toLowerCase();
+  if (lower === 'n/a' || lower === 'na' || lower === '-') return 'N/A';
+
+  const numericMatch = normalized.match(/[-+]?\d*\.?\d+/);
+  if (numericMatch) {
+    return `${numericMatch[0]}%`;
+  }
+
+  // Fall back to de-duplicated percent symbols for unusual values.
+  const compact = normalized.replace(/%+/g, '%');
+  return compact.endsWith('%') ? compact : `${compact}%`;
+};
+
 // Bloom's Taxonomy levels
 export const BLOOM_LEVELS = ['CU', 'AP', 'AN', 'EV', 'CR'] as const;
 export type BloomLevel = (typeof BLOOM_LEVELS)[number];

@@ -5,7 +5,7 @@ import { Building2, Crown, FileText, Flame, Globe, LineChart, Rocket, Star } fro
 import { useRouter } from 'next/navigation';
 import { Layout, MetricCard } from '@/components';
 import { GlobalSearch } from '@/components/Search';
-import { getCompaniesShort, categorizeCompanies, getStatistics } from '@/utils/data';
+import { getCompaniesShort, categorizeCompanies, getStatistics, formatPercentage } from '@/utils/data';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -207,7 +207,7 @@ const CompanyQuickCard: React.FC<CompanyQuickCardProps> = ({ company, onSelect }
       </div>
       <p className="text-xs sm:text-sm text-slate-600 mb-1.5 sm:mb-2 truncate">{company.employee_size}</p>
       <div className="flex items-center gap-2">
-        <span className="text-sm font-bold text-green-600">{company.yoy_growth_rate}%</span>
+        <span className="text-sm font-bold text-green-600">{formatPercentage(company.yoy_growth_rate)}</span>
         <span className="text-xs text-slate-600">YoY growth</span>
       </div>
     </button>

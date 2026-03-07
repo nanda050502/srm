@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Chip } from './UI';
 import { Zap, Building2, TrendingUp, Briefcase, Clock, Coins, Heart, Book, Camera, Code, Cloud, Server } from 'lucide-react';
+import { formatPercentage } from '@/utils/data';
 
 interface CompanyCardProps {
   id: string;
@@ -165,12 +166,6 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({
   const offices = office_locations.split(';').map((o) => o.trim());
   const countries = operating_countries.split(';').map((c) => c.trim());
   const categoryConfig = getCategoryConfig(category);
-  
-  // Normalize growth rate
-  const normalizeGrowth = (rate: string | number) => {
-    if (typeof rate === 'number') return rate.toFixed(1);
-    return rate.toString().replace('%', '').trim();
-  };
 
   const initials = short_name.substring(0, 2).toUpperCase();
   const colors = ['bg-blue-600', 'bg-slate-700', 'bg-emerald-600', 'bg-amber-600', 'bg-indigo-600', 'bg-rose-600'];
@@ -241,7 +236,7 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({
           {/* Growth Rate */}
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
             <p className="text-xs text-green-700 font-medium">YoY Growth Rate</p>
-            <p className="text-2xl font-bold text-green-900">{normalizeGrowth(yoy_growth_rate)}%</p>
+            <p className="text-2xl font-bold text-green-900">{formatPercentage(yoy_growth_rate)}</p>
           </div>
         </div>
 

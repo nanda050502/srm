@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Globe, Instagram, Linkedin, MapPin, Twitter, Target, Brain, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 import { Chip } from '../UI';
-import { CompanyFull } from '@/utils/data';
+import { CompanyFull, formatPercentage } from '@/utils/data';
 
 interface CompanyHeroProps {
   company: CompanyFull;
@@ -79,7 +79,7 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
               </div>
 
               <div className="inline-flex items-center gap-2">
-                <span className="text-xl sm:text-2xl font-bold text-green-600">{company.yoy_growth_rate}%</span>
+                <span className="text-xl sm:text-2xl font-bold text-green-600">{formatPercentage(company.yoy_growth_rate)}</span>
                 <span className="text-xs sm:text-sm text-slate-600">YoY Growth</span>
               </div>
 

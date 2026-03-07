@@ -23,7 +23,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { Tabs, Chip } from '../UI';
-import { CompanyFull, BLOOM_LEVELS, generateMockSkills, getBloomDescription } from '@/utils/data';
+import { CompanyFull, BLOOM_LEVELS, generateMockSkills, getBloomDescription, formatPercentage } from '@/utils/data';
 import hiringRoundsMaster from '@/data/Hiring_rounds.json';
 
 interface CompanyTabsProps {
@@ -391,7 +391,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
                 </div>
                 <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
                   <p className="text-xs font-semibold text-orange-700 mb-1">YoY Growth</p>
-                  <p className="text-xl font-bold text-orange-900">{company.yoy_growth_rate}%</p>
+                  <p className="text-xl font-bold text-orange-900">{formatPercentage(company.yoy_growth_rate)}</p>
                 </div>
               </div>
 
