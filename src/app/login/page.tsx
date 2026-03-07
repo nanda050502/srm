@@ -171,7 +171,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {isChecking ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
@@ -184,10 +184,10 @@ export default function LoginPage() {
       ) : (
         <>
           {/* Main Content - Single Responsive Container */}
-          <div className="flex-1 overflow-hidden flex">
-            <div className="w-full flex flex-col lg:flex-row items-center justify-center lg:justify-between lg:overflow-y-auto overflow-hidden">
+          <div className="flex-1 flex">
+            <div className="w-full flex flex-col lg:flex-row">
               {/* Left Section - Info Panel */}
-              <div className="hidden lg:flex lg:w-1/2 h-full bg-gray-100 relative flex-col justify-start">
+              <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-gray-100 relative flex-col justify-start overflow-y-auto">
                 <div className="absolute top-[0.125rem] left-8">
                   <Image 
                     src="/logos/srm-logo.png" 
@@ -249,22 +249,22 @@ export default function LoginPage() {
               </div>
 
               {/* Right Section - Login Card */}
-              <div className="w-full lg:w-1/2 h-fit bg-gray-100 flex items-center justify-center py-4 px-3 sm:py-6 sm:px-6 lg:p-8">
-                <div className="w-full max-w-[95%] sm:max-w-md bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-200">
-                  <div className="mb-3 sm:mb-4 text-center">
-                    <div className="flex justify-center mb-0 lg:hidden">
+              <div className="w-full lg:w-1/2 min-h-screen bg-gray-100 flex items-center justify-center py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+                <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-200 my-auto">
+                  <div className="mb-6 text-center">
+                    <div className="flex justify-center mb-3 lg:hidden">
                       <Image 
                         src="/logos/srm-logo.png" 
                         alt="SRM Logo" 
                         width={160} 
                         height={160}
-                        className="w-32 h-20 object-contain"
+                        className="w-28 h-auto object-contain"
                       />
                     </div>
                     <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">Sign In</h3>
                   </div>
 
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
                   {/* Error Message */}
                   {error && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -282,7 +282,7 @@ export default function LoginPage() {
                       value={email.split('@')[0]}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Your NetID"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                     />
                     <p className="text-xs text-gray-500 mt-1.5">Part of your email before @srmist.edu.in</p>
                   </div>
@@ -298,12 +298,12 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
@@ -319,7 +319,7 @@ export default function LoginPage() {
                       <canvas
                         ref={canvasRef}
                         className="w-full border border-gray-300 rounded bg-white"
-                        style={{ maxWidth: '100%', height: 'auto', minHeight: '25px', display: 'block' }}
+                        style={{ maxWidth: '100%', height: '50px', display: 'block' }}
                       />
                     </div>
                     <div className="flex gap-2 mb-3">
@@ -329,12 +329,12 @@ export default function LoginPage() {
                         onChange={(e) => setUserCaptchaInput(e.target.value)}
                         placeholder="Enter text from image"
                         maxLength={6}
-                        className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all uppercase text-sm text-gray-900"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all uppercase text-sm text-gray-900"
                       />
                       <button
                         type="button"
                         onClick={handleRefreshCaptcha}
-                        className="px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-shrink-0"
                         title="Refresh CAPTCHA"
                       >
                         <RefreshCw className="h-5 w-5 text-gray-600" />
@@ -346,7 +346,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-8"
+                    className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                   >
                     {isLoading ? 'Signing in...' : 'Sign In'}
                   </button>
