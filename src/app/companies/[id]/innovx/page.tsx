@@ -62,7 +62,7 @@ export default function CompanyInnovxPage({ params }: PageProps) {
 
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-2 break-words">InnovX</h1>
-          <p className="text-sm sm:text-base text-slate-600 break-words">Innovation insights for {innovx.innovx_master.company_name}</p>
+          <p className="text-sm sm:text-base text-slate-600 break-words">Innovation insights for {innovx.innovx_master?.company_name || company.name}</p>
         </div>
 
         <section className="space-y-3 sm:space-y-4">
