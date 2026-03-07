@@ -7,8 +7,15 @@ import Link from 'next/link';
 import { Layout } from '@/components';
 import { getCompaniesShort } from '@/utils/data';
 
+interface HiringCompany {
+  name: string;
+  logoUrl: string;
+  jobRoles: string[];
+  totalRounds: number;
+}
+
 // Get unique companies from hiring data with logos
-function getUniqueCompaniesFromHiring() {
+function getUniqueCompaniesFromHiring(): HiringCompany[] {
   const hiringRoundData = require('@/data/Hiring_rounds.json');
   const allCompanies = getCompaniesShort();
   

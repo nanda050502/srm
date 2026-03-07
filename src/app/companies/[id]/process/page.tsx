@@ -27,7 +27,7 @@ export default function CompanyHiringProcessPage({ params }: PageProps) {
     );
   }
 
-  const roles = hiringData ? hiringData.job_role_details : [];
+  const roles = hiringData?.job_role_details || [];
   const [activeRoleIndex, setActiveRoleIndex] = useState(0);
   const activeRole = roles[Math.min(activeRoleIndex, Math.max(roles.length - 1, 0))];
 

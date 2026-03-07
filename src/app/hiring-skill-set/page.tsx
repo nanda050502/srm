@@ -48,12 +48,14 @@ export default function HiringSkillSetPage() {
     
     // Create a map for quick skill level lookup
     const skillLevelsMap = new Map(
-      skillLevelsData.companies.map(c => [c.company.toLowerCase().trim(), c])
+      skillLevelsData.companies
+        .filter(c => c.company)
+        .map(c => [c.company.toLowerCase().trim(), c])
     );
 
     // Process each company
     const companies = entries.map(entry => {
-      const companySkills = skillLevelsMap.get(entry.company_name.toLowerCase().trim());
+      const companySkills = skillLevelsMap.get(entry.company_name?.toLowerCase().trim() || '');
       
       let totalRounds = 0;
       let totalSkills = 0;
@@ -83,7 +85,7 @@ export default function HiringSkillSetPage() {
     });
 
     return {
-      companies: companies.sort((a, b) => a.company_name.localeCompare(b.company_name)),
+      companies: companies.sort((a, b) => (a.company_name || '').localeCompare(b.company_name || '')),
       totalCompanies: companies.length,
       totalRoles: companies.reduce((sum, c) => sum + c.totalRoles, 0),
       totalRounds: companies.reduce((sum, c) => sum + c.totalRounds, 0),
@@ -96,7 +98,7 @@ export default function HiringSkillSetPage() {
     
     const query = searchQuery.toLowerCase();
     return hiringData.companies.filter(c =>
-      c.company_name.toLowerCase().includes(query)
+      c.company_name?.toLowerCase().includes(query)
     );
   }, [hiringData.companies, searchQuery]);
 

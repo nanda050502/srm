@@ -12,14 +12,20 @@ interface GlobalSearchProps {
   companies: SearchResult[];
   onSelect: (companyId: string) => void;
   placeholder?: string;
+  query?: string;
+  onQueryChange?: (query: string) => void;
 }
 
 export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   companies,
   onSelect,
   placeholder = 'Search by company name...',
+  query: controlledQuery,
+  onQueryChange,
 }) => {
-  const [query, setQuery] = useState('');
+  const [internalQuery, setInternalQuery] = useState('');
+  const query = controlledQuery !== undefined ? controlledQuery : internalQuery;
+  const setQuery = onQueryChange || setInternalQuery;
   const [isOpen, setIsOpen] = useState(false);
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
 
