@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Layout } from '@/components';
 import { getCompanyById, getHiringRoundsData } from '@/utils/data';
 import { Chip } from '@/components/UI';
@@ -14,6 +15,7 @@ interface PageProps {
 
 export default function CompanyHiringProcessPage({ params }: PageProps) {
   const resolvedParams = use(params);
+  const searchParams = useSearchParams();
   const company = getCompanyById(resolvedParams.id);
   const hiringData = getHiringRoundsData(company?.name);
 
@@ -30,17 +32,19 @@ export default function CompanyHiringProcessPage({ params }: PageProps) {
   const roles = hiringData?.job_role_details || [];
   const [activeRoleIndex, setActiveRoleIndex] = useState(0);
   const activeRole = roles[Math.min(activeRoleIndex, Math.max(roles.length - 1, 0))];
+  const requestedFrom = searchParams.get('from');
+  const fromHref = requestedFrom && requestedFrom.startsWith('/') ? requestedFrom : `/companies/${company.id}`;
 
   return (
     <Layout>
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 flex-wrap">
-          <Link href={`/companies/${company.id}`} className="text-blue-700 hover:underline break-words">{company.name}</Link>
+          <Link href={fromHref} className="text-blue-700 hover:underline break-words">{company.name}</Link>
           <span>/</span>
           <span>Hiring Process</span>
         </div>
 
-        <CompanyContextHeader company={company} active="process" />
+        <CompanyContextHeader company={company} active="process" fromHref={fromHref} />
 
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-2 break-words">Hiring Process</h1>

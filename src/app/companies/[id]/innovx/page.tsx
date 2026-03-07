@@ -3,6 +3,7 @@
 import React from 'react';
 import { use } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Layout } from '@/components';
 import { getCompanyById, getInnovxDataForCompany } from '@/utils/data';
 import { Chip } from '@/components/UI';
@@ -14,6 +15,7 @@ interface PageProps {
 
 export default function CompanyInnovxPage({ params }: PageProps) {
   const resolvedParams = use(params);
+  const searchParams = useSearchParams();
   const company = getCompanyById(resolvedParams.id);
   const innovx = company ? getInnovxDataForCompany(company.name) : null;
 
@@ -28,15 +30,18 @@ export default function CompanyInnovxPage({ params }: PageProps) {
   }
 
   if (!innovx) {
+    const requestedFrom = searchParams.get('from');
+    const fromHref = requestedFrom && requestedFrom.startsWith('/') ? requestedFrom : `/companies/${company.id}`;
+
     return (
       <Layout>
         <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 flex-wrap">
-            <Link href={`/companies/${company.id}`} className="text-blue-700 hover:underline break-words">{company.name}</Link>
+            <Link href={fromHref} className="text-blue-700 hover:underline break-words">{company.name}</Link>
             <span>/</span>
             <span>InnovX</span>
           </div>
-          <CompanyContextHeader company={company} active="innovx" />
+          <CompanyContextHeader company={company} active="innovx" fromHref={fromHref} />
           <div className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 text-center">
             <p className="text-sm sm:text-base text-slate-600">InnovX data is not yet available for this company.</p>
           </div>
@@ -48,17 +53,19 @@ export default function CompanyInnovxPage({ params }: PageProps) {
   const tier1 = innovx.innovx_projects?.filter((p) => p.tier_level === 'Tier 1') || [];
   const tier2 = innovx.innovx_projects?.filter((p) => p.tier_level === 'Tier 2') || [];
   const tier3 = innovx.innovx_projects?.filter((p) => p.tier_level === 'Tier 3') || [];
+  const requestedFrom = searchParams.get('from');
+  const fromHref = requestedFrom && requestedFrom.startsWith('/') ? requestedFrom : `/companies/${company.id}`;
 
   return (
     <Layout>
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 flex-wrap">
-          <Link href={`/companies/${company.id}`} className="text-blue-700 hover:underline break-words">{company.name}</Link>
+          <Link href={fromHref} className="text-blue-700 hover:underline break-words">{company.name}</Link>
           <span>/</span>
           <span>InnovX</span>
         </div>
 
-        <CompanyContextHeader company={company} active="innovx" />
+        <CompanyContextHeader company={company} active="innovx" fromHref={fromHref} />
 
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-2 break-words">InnovX</h1>

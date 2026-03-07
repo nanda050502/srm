@@ -6,9 +6,10 @@ import { CompanyFull } from '@/utils/data';
 interface CompanyContextHeaderProps {
   company: CompanyFull;
   active: 'skills' | 'process' | 'innovx';
+  fromHref?: string;
 }
 
-export default function CompanyContextHeader({ company, active }: CompanyContextHeaderProps) {
+export default function CompanyContextHeader({ company, active, fromHref }: CompanyContextHeaderProps) {
   const headquarters = company.headquarters_address || company.headquarters;
   const establishedYear = company.incorporation_year || company.founded_year;
   const employeeSize = company.employee_size;
@@ -16,6 +17,14 @@ export default function CompanyContextHeader({ company, active }: CompanyContext
   const logoUrl = company.logo_url;
   const initials = company.short_name.substring(0, 2).toUpperCase();
   const [logoError, setLogoError] = useState(false);
+
+  const makeTabHref = (segment: 'skills' | 'process' | 'innovx') => {
+    const basePath = `/companies/${companyId}/${segment}`;
+    if (!fromHref) {
+      return basePath;
+    }
+    return `${basePath}?from=${encodeURIComponent(fromHref)}`;
+  };
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4 sticky top-0 z-20">
@@ -62,7 +71,7 @@ export default function CompanyContextHeader({ company, active }: CompanyContext
         {companyId && (
           <div className="flex items-center gap-2 flex-wrap justify-center lg:justify-start">
             <Link
-              href={`/companies/${companyId}/skills`}
+              href={makeTabHref('skills')}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
                 active === 'skills'
                   ? 'bg-blue-600 text-white border-blue-600'
@@ -72,7 +81,7 @@ export default function CompanyContextHeader({ company, active }: CompanyContext
               Hiring Skill Sets
             </Link>
             <Link
-              href={`/companies/${companyId}/process`}
+              href={makeTabHref('process')}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
                 active === 'process'
                   ? 'bg-blue-600 text-white border-blue-600'
@@ -82,7 +91,7 @@ export default function CompanyContextHeader({ company, active }: CompanyContext
               Hiring Rounds
             </Link>
             <Link
-              href={`/companies/${companyId}/innovx`}
+              href={makeTabHref('innovx')}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
                 active === 'innovx'
                   ? 'bg-blue-600 text-white border-blue-600'

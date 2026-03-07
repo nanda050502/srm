@@ -5,6 +5,7 @@ import { use } from 'react';
 import { Layout } from '@/components';
 import { getCompanyById, getCompanySkillLevel, getHiringRoundsData } from '@/utils/data';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import CompanyContextHeader from '@/components/CompanyDetail/CompanyContextHeader';
 
 interface PageProps {
@@ -31,6 +32,7 @@ const formatSkillName = (skill: string) => {
 
 export default function CompanySkillPage({ params }: PageProps) {
   const resolvedParams = use(params);
+  const searchParams = useSearchParams();
   const company = getCompanyById(resolvedParams.id);
   
   const skillData = useMemo(() => {
@@ -96,18 +98,21 @@ export default function CompanySkillPage({ params }: PageProps) {
     );
   }
 
+  const requestedFrom = searchParams.get('from');
+  const fromHref = requestedFrom && requestedFrom.startsWith('/') ? requestedFrom : `/companies/${company.id}`;
+
   return (
     <Layout>
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 flex-wrap">
-          <Link href={`/companies/${company.id}`} className="text-blue-700 hover:underline break-words">
+          <Link href={fromHref} className="text-blue-700 hover:underline break-words">
             {company.name}
           </Link>
           <span>/</span>
           <span>Hiring Skill Sets</span>
         </div>
 
-        <CompanyContextHeader company={company} active="skills" />
+        <CompanyContextHeader company={company} active="skills" fromHref={fromHref} />
 
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-2 break-words">

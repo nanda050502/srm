@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Layout } from '@/components';
 import { getCompaniesFull } from '@/utils/data';
 import { GlobalSearch } from '@/components/Search';
@@ -33,6 +33,7 @@ export const CompanyEntryPage: React.FC<CompanyEntryPageProps> = ({
 }) => {
   const companies = getCompaniesFull();
   const router = useRouter();
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [imageErrors, setImageErrors] = useState<CompanyImageState>({});
 
@@ -54,7 +55,8 @@ export const CompanyEntryPage: React.FC<CompanyEntryPageProps> = ({
   }, [companies, searchQuery]);
 
   const handleSelect = (companyId: string) => {
-    router.push(`/companies/${companyId}/${targetRoute}`);
+    const from = pathname || '/';
+    router.push(`/companies/${companyId}/${targetRoute}?from=${encodeURIComponent(from)}`);
   };
 
   return (
@@ -94,7 +96,7 @@ export const CompanyEntryPage: React.FC<CompanyEntryPageProps> = ({
               return (
                 <Link
                   key={company.id}
-                  href={`/companies/${company.id}/${targetRoute}`}
+                  href={`/companies/${company.id}/${targetRoute}?from=${encodeURIComponent(pathname || '/')}`}
                   className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-center justify-between">
