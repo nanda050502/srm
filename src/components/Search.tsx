@@ -56,6 +56,12 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     setIsOpen(false);
   };
 
+  const handleEnterKeySelect = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || filteredResults.length === 0) return;
+    event.preventDefault();
+    handleSelect(filteredResults[0].id);
+  };
+
   return (
     <div className="relative w-full">
       <Input
@@ -64,6 +70,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
         placeholder={placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={handleEnterKeySelect}
         onFocus={() => query && setIsOpen(true)}
         onBlur={() => setTimeout(() => setIsOpen(false), 200)}
         className="w-full text-lg py-3 pl-11 pr-4"
@@ -75,7 +82,12 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
             {filteredResults.map((result) => (
               <button
                 key={result.id}
-                onClick={() => handleSelect(result.id)}
+                type="button"
+                onMouseDown={(event) => {
+                  // Use mousedown so selection still works even if input blur fires first.
+                  event.preventDefault();
+                  handleSelect(result.id);
+                }}
                 className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-0"
               >
                 <p className="font-semibold text-slate-900">{result.name}</p>

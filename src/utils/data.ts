@@ -21,11 +21,21 @@ export interface CompanyFull extends CompanyShort {
   [key: string]: any;
 }
 
+const normalizeCompanyId = (id: string | number | undefined): string | undefined => {
+  if (id === undefined || id === null) return undefined;
+  const idString = String(id).trim();
+  if (!idString) return undefined;
+  return idString.startsWith('comp_') ? idString : `comp_${idString}`;
+};
+
 // Normalize company ID
-const normalizeCompany = (company: any): CompanyShort & { id: string } => ({
-  ...company,
-  id: company.id || `comp_${company.company_id}`,
-});
+const normalizeCompany = (company: any): CompanyShort & { id: string } => {
+  const normalizedId = normalizeCompanyId(company.id ?? company.company_id);
+  return {
+    ...company,
+    id: normalizedId || '',
+  };
+};
 
 export const getCompaniesShort = (): (CompanyShort & { id: string })[] => {
   const companies = Array.isArray(companiesShort) ? companiesShort : [companiesShort];
@@ -38,8 +48,8 @@ export const getCompaniesFull = (): (CompanyFull & { id: string })[] => {
 };
 
 export const getCompanyById = (id: string): (CompanyFull & { id: string }) | undefined => {
-  const company = getCompaniesFull().find((c) => c.id === id || c.id === id.replace('comp_', ''));
-  return company;
+  const normalizedSearchId = normalizeCompanyId(id);
+  return getCompaniesFull().find((company) => company.id === normalizedSearchId);
 };
 
 export const searchCompanies = (query: string): (CompanyShort & { id: string })[] => {
