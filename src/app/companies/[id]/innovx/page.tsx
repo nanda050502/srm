@@ -15,7 +15,7 @@ interface PageProps {
 export default function CompanyInnovxPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const company = getCompanyById(resolvedParams.id);
-  const innovx = company ? getInnovxDataForCompany(company.name, company.short_name) : null;
+  const innovx = company ? getInnovxDataForCompany(company.name) : null;
 
   if (!company) {
     return (
