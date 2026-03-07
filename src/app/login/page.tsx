@@ -194,7 +194,7 @@ export default function LoginPage() {
                     alt="SRM Logo" 
                     width={200} 
                     height={200}
-                    className="w-50 h-50"
+                    className="w-50 h-50 object-contain"
                   />
                 </div>
                 <div className="w-full pt-56 px-8 pb-8">
@@ -245,13 +245,6 @@ export default function LoginPage() {
                       <li>• Any unauthorized access attempts will be reported</li>
                     </ul>
                   </div>
-
-                  <div className="mt-4 p-4 bg-white rounded-lg border border-blue-200">
-                    <p className="text-xs text-gray-700">
-                      <strong>Login with NetID:</strong> Use your SRM email ID before @srmist.edu.in
-                    </p>
-                    <p className="text-xs text-gray-500 mt-2">e.g., if your email is john@srmist.edu.in, your NetID is <code className="bg-gray-100 px-2 py-1 rounded">john</code></p>
-                  </div>
                 </div>
               </div>
 
@@ -265,7 +258,7 @@ export default function LoginPage() {
                         alt="SRM Logo" 
                         width={160} 
                         height={160}
-                        className="w-32 h-20"
+                        className="w-32 h-20 object-contain"
                       />
                     </div>
                     <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">Sign In</h3>
