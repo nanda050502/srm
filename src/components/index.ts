@@ -5,3 +5,4 @@ export { CompanyCard } from './CompanyCard';
 export { GlobalSearch, AlphabeticalSearch } from './Search';
 export { Layout } from './Layout';
 export { UserAccountBadge } from './UserAccountBadge';
+export { AccountModal } from './AccountModal';

@@ -2,9 +2,20 @@
 
 import React, { useState } from 'react';
 import { User, Settings, LogOut } from 'lucide-react';
+import { AccountModal } from './AccountModal';
+import { useRouter } from 'next/navigation';
 
 export const UserAccountBadge: React.FC = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    setIsOpen(false);
+    router.push('/login');
+  };
 
   return (
     <div 
@@ -50,7 +61,7 @@ export const UserAccountBadge: React.FC = () => {
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  // Add account settings navigation here
+                  setIsAccountModalOpen(true);
                 }}
                 className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-blue-50 transition-colors flex items-center gap-3"
               >
@@ -61,21 +72,18 @@ export const UserAccountBadge: React.FC = () => {
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  // Add settings navigation here
+                  // Add change password logic here
                 }}
                 className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-blue-50 transition-colors flex items-center gap-3"
               >
                 <Settings className="h-4 w-4 text-blue-600" />
-                <span>Settings</span>
+                <span>Change Password</span>
               </button>
 
               <div className="border-t border-slate-200 my-2"></div>
 
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  // Add logout logic here
-                }}
+                onClick={handleLogout}
                 className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
               >
                 <LogOut className="h-4 w-4" />
@@ -85,6 +93,9 @@ export const UserAccountBadge: React.FC = () => {
           </div>
         </>
       )}
+
+      {/* Account Modal */}
+      <AccountModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
     </div>
   );
 };

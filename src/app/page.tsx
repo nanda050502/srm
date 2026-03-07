@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Building2, Crown, FileText, Flame, Globe, LineChart, Rocket, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Layout, MetricCard } from '@/components';
@@ -9,6 +9,33 @@ import { getCompaniesShort, categorizeCompanies, getStatistics } from '@/utils/d
 
 export default function Dashboard() {
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const loggedIn = localStorage.getItem('isLoggedIn');
+    if (!loggedIn) {
+      router.push('/login');
+    } else {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    }
+  }, [router]);
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 text-white flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
+            <span className="text-2xl font-bold">SRM</span>
+          </div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const companies = getCompaniesShort();
   const { marquee, superDream, dream, regular } = categorizeCompanies(companies);
   const stats = getStatistics(companies);
