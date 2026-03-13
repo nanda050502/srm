@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Layout } from '@/components';
-import { getCompaniesFull } from '@/utils/data';
+import { getCompaniesFull, getRenderableLogoUrl, getClearbitLogoUrl, getWebsiteFallbackLogoUrl } from '@/utils/data';
 import { GlobalSearch } from '@/components/Search';
 
 interface CompanyEntryPageProps {
@@ -14,15 +14,12 @@ interface CompanyEntryPageProps {
   accentClass?: string;
 }
 
-const getLogoUrl = (value: string) => {
-  if (!value || typeof value !== 'string') return '';
-  const cleaned = value.replace(/^['"]|['"]$/g, '').trim();
-  if (!cleaned.startsWith('http')) return '';
-  return cleaned;
-};
-
 interface CompanyImageState {
   [key: string]: boolean;
+}
+
+interface CompanyImageSourceState {
+  [key: string]: string;
 }
 
 export const CompanyEntryPage: React.FC<CompanyEntryPageProps> = ({
@@ -36,6 +33,7 @@ export const CompanyEntryPage: React.FC<CompanyEntryPageProps> = ({
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [imageErrors, setImageErrors] = useState<CompanyImageState>({});
+  const [imageSources, setImageSources] = useState<CompanyImageSourceState>({});
 
   const searchableCompanies = companies.map((company) => ({
     id: company.id,
@@ -85,7 +83,11 @@ export const CompanyEntryPage: React.FC<CompanyEntryPageProps> = ({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCompanies.map((company) => {
-              const logo = getLogoUrl(company.logo_url);
+              const website = company.website_url || company.website;
+              const primaryLogo = getRenderableLogoUrl(company.logo_url, website);
+              const clearbitLogo = getClearbitLogoUrl(website);
+              const faviconLogo = getWebsiteFallbackLogoUrl(website);
+              const logo = imageSources[company.id] || primaryLogo || clearbitLogo || faviconLogo;
               const headquarters = company.headquarters_address || company.headquarters;
               const initials = company.short_name.substring(0, 2).toUpperCase();
               const logoFailed = imageErrors[company.id] || !logo;
@@ -112,7 +114,17 @@ export const CompanyEntryPage: React.FC<CompanyEntryPageProps> = ({
                             src={logo} 
                             alt={company.name} 
                             className="w-10 h-10 object-contain"
-                            onError={() => setImageErrors(prev => ({ ...prev, [company.id]: true }))}
+                            onError={() => {
+                              if (clearbitLogo && logo !== clearbitLogo) {
+                                setImageSources((prev) => ({ ...prev, [company.id]: clearbitLogo }));
+                                return;
+                              }
+                              if (faviconLogo && logo !== faviconLogo) {
+                                setImageSources((prev) => ({ ...prev, [company.id]: faviconLogo }));
+                                return;
+                              }
+                              setImageErrors((prev) => ({ ...prev, [company.id]: true }));
+                            }}
                           />
                         )}
                       </div>

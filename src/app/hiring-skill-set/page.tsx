@@ -153,13 +153,13 @@ export default function HiringSkillSetPage() {
         {/* Search */}
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-500" />
             <input
               type="text"
               placeholder="Search companies..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
             />
           </div>
           <div className="mt-2 text-sm text-slate-600">
@@ -321,7 +321,7 @@ export default function HiringSkillSetPage() {
 
                                               {skill.typical_questions && (
                                                 <p className="text-xs text-slate-600 mt-2 italic">
-                                                  "{skill.typical_questions}"
+                                                  &quot;{skill.typical_questions}&quot;
                                                 </p>
                                               )}
 

@@ -99,7 +99,7 @@ export default function InnovXPage() {
                           </span>
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                     </div>
 
                     {/* Company Details */}

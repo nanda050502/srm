@@ -69,7 +69,7 @@ export default function InsightsPage() {
         <div className="mt-auto bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-slate-200 p-12 text-center">
           <p className="text-lg text-slate-600 mb-2">More insights coming soon</p>
           <p className="text-sm text-slate-500">
-            We're analyzing placement data to bring you deeper insights and trends
+            We&apos;re analyzing placement data to bring you deeper insights and trends
           </p>
         </div>
       </div>

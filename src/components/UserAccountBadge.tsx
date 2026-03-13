@@ -9,10 +9,39 @@ export const UserAccountBadge: React.FC = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState('john.doe@example.com');
+  const [userRole, setUserRole] = useState('Student');
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const hydrateSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session', { cache: 'no-store' });
+        const session = await response.json();
+        if (!isMounted || !session.authenticated) return;
+
+        if (session.email) {
+          setUserEmail(session.email);
+        }
+
+        if (session.role) {
+          setUserRole(session.role.charAt(0).toUpperCase() + session.role.slice(1));
+        }
+      } catch {
+        // Keep default display values if session endpoint is unavailable.
+      }
+    };
+
+    hydrateSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
     setIsOpen(false);
     router.push('/login');
   };
@@ -50,8 +79,8 @@ export const UserAccountBadge: React.FC = () => {
                   JD
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 truncate">John Doe</p>
-                  <p className="text-sm text-slate-600 truncate">john.doe@example.com</p>
+                  <p className="font-semibold text-slate-900 truncate">{userRole} Account</p>
+                  <p className="text-sm text-slate-600 truncate">{userEmail}</p>
                 </div>
               </div>
             </div>

@@ -108,9 +108,9 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input: React.FC<InputProps> = ({ icon, error, className = '', ...props }) => {
-  const baseClasses = `w-full px-4 py-2 border rounded-lg font-medium text-slate-900 placeholder-slate-500 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${
+  const baseClasses = `w-full px-3 py-2 text-sm border rounded-lg font-medium text-slate-900 placeholder-slate-500 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all ${
     icon ? 'pl-10' : ''
-  } ${error ? 'border-red-500' : 'border-slate-200'}`;
+  } ${error ? 'border-red-500' : 'border-slate-300'}`;
 
   return (
     <div className="relative">

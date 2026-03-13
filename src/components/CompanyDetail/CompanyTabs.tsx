@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
   Brain,
@@ -23,7 +23,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { Tabs, Chip } from '../UI';
-import { CompanyFull, BLOOM_LEVELS, generateMockSkills, getBloomDescription, formatPercentage } from '@/utils/data';
+import { CompanyFull, formatPercentage } from '@/utils/data';
 import hiringRoundsMaster from '@/data/Hiring_rounds.json';
 
 interface CompanyTabsProps {
@@ -32,12 +32,38 @@ interface CompanyTabsProps {
   onTabChange: (tabId: string) => void;
 }
 
+interface HiringSkillSet {
+  skill_set_code: string;
+}
+
+interface HiringRoundDetail {
+  round_number: number;
+  round_name: string;
+  round_category: string;
+  evaluation_type: string;
+  assessment_mode: string;
+  skill_sets?: HiringSkillSet[];
+}
+
+interface HiringRoleDetail {
+  role_title: string;
+  role_category: string;
+  opportunity_type: string;
+  compensation: string;
+  ctc_or_stipend: number;
+  job_description: string;
+  benefits_summary?: string;
+  hiring_rounds?: HiringRoundDetail[];
+}
+
+interface CompanyHiringEntry {
+  company_name: string;
+  job_role_details?: HiringRoleDetail[];
+}
+
 export default function CompanyTabs({ company, activeTab, onTabChange }: CompanyTabsProps) {
-  const [selectedSkills, setSelectedSkills] = useState<(typeof BLOOM_LEVELS)[number]>('CU');
-  const mockSkills = generateMockSkills();
-  
   // Get hiring data for this company
-  const hiringData = (hiringRoundsMaster as any[]).find(
+  const hiringData = (hiringRoundsMaster as CompanyHiringEntry[]).find(
     (entry) => 
       entry.company_name === company.name || 
       entry.company_name === company.short_name
@@ -880,9 +906,9 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
         
         // Calculate skill frequencies across all hiring rounds
         const skillFrequencyMap = new Map<string, number>();
-        companyHiringData.forEach((role: any) => {
-          role.hiring_rounds?.forEach((round: any) => {
-            round.skill_sets?.forEach((skill: any) => {
+        companyHiringData.forEach((role) => {
+          role.hiring_rounds?.forEach((round) => {
+            round.skill_sets?.forEach((skill) => {
               const code = skill.skill_set_code;
               skillFrequencyMap.set(code, (skillFrequencyMap.get(code) || 0) + 1);
             });
@@ -900,7 +926,11 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
               <Section title="Top Skills in Hiring" icon={<Brain className="h-5 w-5" />}>
                 <div className="space-y-3">
                   {sortedSkills.map(([skill, count]) => {
-                    const percentage = (count / (companyHiringData.reduce((sum: number, role: any) => sum + (role.hiring_rounds?.length || 0), 0))) * 100;
+                    const totalRounds = companyHiringData.reduce(
+                      (sum, role) => sum + (role.hiring_rounds?.length || 0),
+                      0
+                    );
+                    const percentage = totalRounds > 0 ? (count / totalRounds) * 100 : 0;
                     return (
                       <div key={skill} className="bg-white border border-slate-200 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
@@ -929,7 +959,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
             {companyHiringData.length > 0 && (
               <Section title="Active Job Roles" icon={<Briefcase className="h-5 w-5" />}>
                 <div className="space-y-4">
-                  {companyHiringData.map((role: any, idx: number) => (
+                  {companyHiringData.map((role, idx: number) => (
                     <Link
                       key={idx}
                       href={`/hiring-rounds/${encodeURIComponent(company.name)}`}
@@ -970,7 +1000,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
             {companyHiringData.length > 0 && companyHiringData[0]?.hiring_rounds && (
               <Section title="Hiring Process" icon={<ClipboardList className="h-5 w-5" />}>
                 <div className="space-y-4">
-                  {companyHiringData[0].hiring_rounds.map((round: any) => (
+                  {companyHiringData[0].hiring_rounds.map((round) => (
                     <div key={round.round_number} className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                       <div className="flex items-start gap-3 mb-3">
                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
@@ -986,7 +1016,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
                       <div className="ml-11">
                         <p className="text-xs font-semibold text-slate-700 mb-2">Skills Tested:</p>
                         <div className="flex flex-wrap gap-2">
-                          {round.skill_sets?.map((skill: any, idx: number) => (
+                          {round.skill_sets?.map((skill, idx: number) => (
                             <Chip key={idx} label={skill.skill_set_code} variant="primary" />
                           ))}
                         </div>
@@ -1013,7 +1043,7 @@ export default function CompanyTabs({ company, activeTab, onTabChange }: Company
                   </div>
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-green-900">
-                      ₹{Math.max(...companyHiringData.map((r: any) => r.ctc_or_stipend)) / 100000}L
+                      ₹{Math.max(...companyHiringData.map((r) => r.ctc_or_stipend)) / 100000}L
                     </p>
                     <p className="text-xs text-green-700">Max CTC</p>
                   </div>
@@ -1057,7 +1087,7 @@ const Section: React.FC<SectionProps> = ({ title, children, icon }) => (
 );
 
 interface InfoGridProps {
-  data: Record<string, string | undefined>;
+  data: Record<string, string | number | undefined | null>;
 }
 
 const InfoGrid: React.FC<InfoGridProps> = ({ data }) => {
@@ -1068,14 +1098,14 @@ const InfoGrid: React.FC<InfoGridProps> = ({ data }) => {
       {entries.map(([key, value]) => {
         // Check if value is a string and contains semicolons (delimiter)
         const stringValue = String(value);
-        const hasDelimiter = typeof value === 'string' && value.includes(';');
+        const hasDelimiter = stringValue.includes(';');
         
         return (
           <div key={key} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
             <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide break-words">{key}</p>
             {hasDelimiter ? (
               <div className="flex flex-wrap gap-1.5">
-                {value.split(';').map((item: string, index: number) => {
+                {stringValue.split(';').map((item: string, index: number) => {
                   const trimmedItem = item.trim();
                   return trimmedItem ? (
                     <Chip key={index} label={trimmedItem} variant="secondary" />

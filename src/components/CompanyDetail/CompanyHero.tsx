@@ -2,14 +2,32 @@ import React, { useState } from 'react';
 import { Globe, Instagram, Linkedin, MapPin, Twitter, Target, Brain, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 import { Chip } from '../UI';
-import { CompanyFull, formatPercentage } from '@/utils/data';
+import { CompanyFull, formatPercentage, getRenderableLogoUrl, getClearbitLogoUrl, getWebsiteFallbackLogoUrl } from '@/utils/data';
 
 interface CompanyHeroProps {
   company: CompanyFull;
+  showNavigationLinks?: boolean;
+  customNavigationLinks?: React.ReactNode;
 }
 
-export default function CompanyHero({ company }: CompanyHeroProps) {
-  const [imageError, setImageError] = useState(!company.logo_url);
+export default function CompanyHero({ company, showNavigationLinks = true, customNavigationLinks }: CompanyHeroProps) {
+  const logoUrl = getRenderableLogoUrl(company.logo_url, company.website_url || company.website);
+  const clearbitLogoUrl = getClearbitLogoUrl(company.website_url || company.website);
+  const faviconLogoUrl = getWebsiteFallbackLogoUrl(company.website_url || company.website);
+  const headquartersAddress =
+    typeof company.headquarters_address === 'string' ? company.headquarters_address : undefined;
+  const headquartersFallback =
+    typeof company.headquarters === 'string' ? company.headquarters : undefined;
+  const headquarters = headquartersAddress || headquartersFallback || 'N/A';
+  const website = typeof company.website === 'string' ? company.website : undefined;
+  const linkedinUrl = typeof company.linkedin_url === 'string' ? company.linkedin_url : undefined;
+  const twitterHandle = typeof company.twitter_handle === 'string' ? company.twitter_handle : undefined;
+  const instagramHandle = typeof company.instagram_handle === 'string' ? company.instagram_handle : undefined;
+  const primaryContactEmail =
+    typeof company.primary_contact_email === 'string' ? company.primary_contact_email : undefined;
+  const phone = typeof company.phone === 'string' ? company.phone : undefined;
+  const [imageSrc, setImageSrc] = useState(logoUrl);
+  const [imageError, setImageError] = useState(!logoUrl);
   const offices = company.office_locations.split(';').map((o) => o.trim());
   const countries = company.operating_countries.split(';').map((c) => c.trim());
   const initials = company.short_name.substring(0, 2).toUpperCase();
@@ -19,30 +37,37 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-      {/* Navigation Buttons - Top Right */}
-      <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 justify-center lg:justify-end">
-        <Link
-          href={`/companies/${company.id}/process`}
-          className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 transition-all touch-manipulation shadow-sm hover:shadow-md"
-        >
-          <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
-          <span className="text-xs sm:text-sm font-medium">Hiring Rounds</span>
-        </Link>
-        <Link
-          href={`/companies/${company.id}/skills`}
-          className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-800 transition-all touch-manipulation shadow-sm hover:shadow-md"
-        >
-          <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
-          <span className="text-xs sm:text-sm font-medium">Hiring Skills</span>
-        </Link>
-        <Link
-          href={`/companies/${company.id}/innovx`}
-          className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-amber-50 hover:border-amber-400 hover:text-amber-800 transition-all touch-manipulation shadow-sm hover:shadow-md"
-        >
-          <Lightbulb className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" />
-          <span className="text-xs sm:text-sm font-medium">InnovX</span>
-        </Link>
-      </div>
+      {(showNavigationLinks || customNavigationLinks) && (
+        <div className="mb-4 sm:mb-6 flex flex-col items-center gap-2 sm:gap-3 lg:flex-row lg:justify-end">
+          {customNavigationLinks}
+
+          {showNavigationLinks && (
+            <>
+              <Link
+                href={`/companies/${company.id}/process`}
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 transition-all touch-manipulation shadow-sm hover:shadow-md"
+              >
+                <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+                <span className="text-xs sm:text-sm font-medium">Hiring Rounds</span>
+              </Link>
+              <Link
+                href={`/companies/${company.id}/skills`}
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-800 transition-all touch-manipulation shadow-sm hover:shadow-md"
+              >
+                <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
+                <span className="text-xs sm:text-sm font-medium">Hiring Skills</span>
+              </Link>
+              <Link
+                href={`/companies/${company.id}/innovx`}
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-amber-50 hover:border-amber-400 hover:text-amber-800 transition-all touch-manipulation shadow-sm hover:shadow-md"
+              >
+                <Lightbulb className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" />
+                <span className="text-xs sm:text-sm font-medium">InnovX</span>
+              </Link>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8">
         {/* Logo and Basic Info */}
@@ -56,10 +81,20 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={company.logo_url}
+                  src={imageSrc}
                   alt={company.name}
                   className="w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 object-contain"
-                  onError={() => setImageError(true)}
+                  onError={() => {
+                    if (clearbitLogoUrl && imageSrc !== clearbitLogoUrl) {
+                      setImageSrc(clearbitLogoUrl);
+                      return;
+                    }
+                    if (faviconLogoUrl && imageSrc !== faviconLogoUrl) {
+                      setImageSrc(faviconLogoUrl);
+                      return;
+                    }
+                    setImageError(true);
+                  }}
                 />
               </>
             )}
@@ -85,15 +120,15 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
 
               <div className="inline-flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-blue-700 flex-shrink-0" />
-                <span className="text-xs sm:text-sm text-slate-700 break-words">{company.headquarters_address || company.headquarters}</span>
+                <span className="text-xs sm:text-sm text-slate-700 break-words">{headquarters}</span>
               </div>
             </div>
 
             {/* Quick Links */}
             <div className="mt-4 sm:mt-6 flex gap-2 sm:gap-3 flex-wrap justify-center sm:justify-start">
-              {company.website && (
+              {website && (
                 <a
-                  href={company.website}
+                  href={website}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-blue-50 hover:text-blue-800 transition-colors touch-manipulation"
@@ -102,9 +137,9 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
                   <span className="text-xs sm:text-sm font-medium">Website</span>
                 </a>
               )}
-              {company.linkedin_url && (
+              {linkedinUrl && (
                 <a
-                  href={company.linkedin_url}
+                  href={linkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-blue-50 hover:text-blue-800 transition-colors touch-manipulation"
@@ -113,9 +148,9 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
                   <span className="text-xs sm:text-sm font-medium">LinkedIn</span>
                 </a>
               )}
-              {company.twitter_handle && (
+              {twitterHandle && (
                 <a
-                  href={`https://twitter.com/${company.twitter_handle.replace('@', '')}`}
+                  href={`https://twitter.com/${twitterHandle.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-blue-50 hover:text-blue-800 transition-colors touch-manipulation"
@@ -124,9 +159,10 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
                   <span className="text-xs sm:text-sm font-medium">Twitter</span>
                 </a>
               )}
-              {company.instagram_handle && (
+              {instagramHandle && (
                 <a
-                  href={`https://instagram.com/${company.instagram_handle.replace('@', '')}`}
+                  href={`https://instagram.com/${instagramHandle.replace('@', '')}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-lg text-slate-800 hover:bg-blue-50 hover:text-blue-800 transition-colors touch-manipulation"
@@ -141,23 +177,23 @@ export default function CompanyHero({ company }: CompanyHeroProps) {
       </div>
 
       {/* Contact Info */}
-      {(company.primary_contact_email || company.phone) && (
+      {(primaryContactEmail || phone) && (
         <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-200">
           <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3">Contact Information</h3>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 flex-wrap">
-            {company.primary_contact_email && (
+            {primaryContactEmail && (
               <div>
                 <p className="text-xs text-slate-600 mb-1">Email</p>
-                <a href={`mailto:${company.primary_contact_email}`} className="text-xs sm:text-sm text-blue-600 hover:underline break-all">
-                  {company.primary_contact_email}
+                <a href={`mailto:${primaryContactEmail}`} className="text-xs sm:text-sm text-blue-600 hover:underline break-all">
+                  {primaryContactEmail}
                 </a>
               </div>
             )}
-            {company.phone && (
+            {phone && (
               <div>
                 <p className="text-xs text-slate-600 mb-1">Phone</p>
-                <a href={`tel:${company.phone}`} className="text-xs sm:text-sm text-blue-600 hover:underline">
-                  {company.phone}
+                <a href={`tel:${phone}`} className="text-xs sm:text-sm text-blue-600 hover:underline">
+                  {phone}
                 </a>
               </div>
             )}

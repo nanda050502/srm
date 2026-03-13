@@ -18,6 +18,7 @@ export default function CompanyHiringProcessPage({ params }: PageProps) {
   const searchParams = useSearchParams();
   const company = getCompanyById(resolvedParams.id);
   const hiringData = getHiringRoundsData(company?.name);
+  const [activeRoleIndex, setActiveRoleIndex] = useState(0);
 
   if (!company) {
     return (
@@ -30,7 +31,6 @@ export default function CompanyHiringProcessPage({ params }: PageProps) {
   }
 
   const roles = hiringData?.job_role_details || [];
-  const [activeRoleIndex, setActiveRoleIndex] = useState(0);
   const activeRole = roles[Math.min(activeRoleIndex, Math.max(roles.length - 1, 0))];
   const requestedFrom = searchParams.get('from');
   const fromHref = requestedFrom && requestedFrom.startsWith('/') ? requestedFrom : `/companies/${company.id}`;
@@ -81,7 +81,7 @@ export default function CompanyHiringProcessPage({ params }: PageProps) {
                             <p className="text-xs text-slate-600 mt-1 break-words">{role.role_category}</p>
                           </div>
                           <div className="flex-shrink-0">
-                            <Chip label={role.opportunity_type} variant={isActive ? 'primary' : 'secondary'} />
+                            <Chip label={role.opportunity_type || 'Employment'} variant={isActive ? 'primary' : 'secondary'} />
                           </div>
                         </div>
                         <p className="text-xs text-slate-500 mt-2 sm:mt-3">{role.hiring_rounds?.length || 0} rounds</p>
@@ -133,9 +133,9 @@ export default function CompanyHiringProcessPage({ params }: PageProps) {
 
                 <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
                   {activeRole?.hiring_rounds?.map((round, index) => (
-                    <div key={`${activeRole?.role_title}-${round.round_number}`} className="relative pl-8 sm:pl-10">
+                    <div key={`${activeRole?.role_title}-${round.round_number ?? index + 1}`} className="relative pl-8 sm:pl-10">
                       <div className="absolute left-0 top-1.5 h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-blue-600 text-white text-xs font-semibold flex items-center justify-center">
-                        {round.round_number}
+                        {round.round_number ?? index + 1}
                       </div>
                       {index < (activeRole?.hiring_rounds?.length || 0) - 1 && (
                         <div className="absolute left-2.5 sm:left-3 top-9 sm:top-10 bottom-0 w-px bg-slate-200" />
@@ -143,16 +143,16 @@ export default function CompanyHiringProcessPage({ params }: PageProps) {
 
                       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5">
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                          <span className="text-xs sm:text-sm font-semibold text-slate-900 break-words">{round.round_name}</span>
-                          <Chip label={round.round_category} variant="primary" />
-                          <Chip label={`${round.evaluation_type} · ${round.assessment_mode}`} variant="secondary" />
+                          <span className="text-xs sm:text-sm font-semibold text-slate-900 break-words">{round.round_name || `Round ${index + 1}`}</span>
+                          <Chip label={round.round_category || 'General'} variant="primary" />
+                          <Chip label={`${round.evaluation_type || 'Evaluation'} · ${round.assessment_mode || 'Online'}`} variant="secondary" />
                         </div>
 
                         <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                          {round.skill_sets.map((skill) => (
-                            <div key={`${round.round_number}-${skill.skill_set_code}`} className="bg-white border border-slate-200 rounded-lg p-3 sm:p-4">
-                              <p className="text-xs sm:text-sm font-semibold text-slate-900 break-words">{skill.skill_set_code}</p>
-                              <p className="text-xs text-slate-600 mt-2 break-words">{skill.typical_questions}</p>
+                          {(round.skill_sets || []).map((skill, skillIndex) => (
+                            <div key={`${round.round_number ?? index + 1}-${skill.skill_set_code ?? skillIndex}`} className="bg-white border border-slate-200 rounded-lg p-3 sm:p-4">
+                              <p className="text-xs sm:text-sm font-semibold text-slate-900 break-words">{skill.skill_set_code || 'General Skill'}</p>
+                              <p className="text-xs text-slate-600 mt-2 break-words">{skill.typical_questions || 'No sample question available.'}</p>
                             </div>
                           ))}
                         </div>

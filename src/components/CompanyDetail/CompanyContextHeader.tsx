@@ -10,11 +10,24 @@ interface CompanyContextHeaderProps {
 }
 
 export default function CompanyContextHeader({ company, active, fromHref }: CompanyContextHeaderProps) {
-  const headquarters = company.headquarters_address || company.headquarters;
-  const establishedYear = company.incorporation_year || company.founded_year;
+  const headquartersAddress =
+    typeof company.headquarters_address === 'string' ? company.headquarters_address : undefined;
+  const headquartersFallback =
+    typeof company.headquarters === 'string' ? company.headquarters : undefined;
+  const headquarters = headquartersAddress || headquartersFallback;
+
+  const incorporationYear =
+    typeof company.incorporation_year === 'number' || typeof company.incorporation_year === 'string'
+      ? company.incorporation_year
+      : undefined;
+  const foundedYear =
+    typeof company.founded_year === 'number' || typeof company.founded_year === 'string'
+      ? company.founded_year
+      : undefined;
+  const establishedYear = incorporationYear || foundedYear;
   const employeeSize = company.employee_size;
   const companyId = company.id || company.company_id?.toString();
-  const logoUrl = company.logo_url;
+  const logoUrl = typeof company.logo_url === 'string' ? company.logo_url : '';
   const initials = company.short_name.substring(0, 2).toUpperCase();
   const [logoError, setLogoError] = useState(false);
 

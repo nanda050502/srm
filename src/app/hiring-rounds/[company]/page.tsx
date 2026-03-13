@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Lightbulb, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -11,16 +11,12 @@ import { Chip } from '@/components/UI';
 export default function CompanyHiringDetailsPage() {
   const params = useParams();
   const companyName = params?.company ? decodeURIComponent(params.company as string) : '';
-  const [hiringData, setHiringData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (companyName) {
-      const data = getHiringRoundsData(companyName);
-      setHiringData(data);
-      setIsLoading(false);
-    }
+  const hiringData = React.useMemo(() => {
+    if (!companyName) return undefined;
+    return getHiringRoundsData(companyName);
   }, [companyName]);
+
+  const isLoading = !companyName;
 
   const hiringRounds = hiringData?.job_role_details || [];
 
@@ -58,7 +54,7 @@ export default function CompanyHiringDetailsPage() {
         {!hiringData && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p className="text-sm text-yellow-800">
-              <strong>Debug:</strong> Looking for company: "{companyName}"
+              <strong>Debug:</strong> Looking for company: &quot;{companyName}&quot;
             </p>
           </div>
         )}
@@ -66,7 +62,7 @@ export default function CompanyHiringDetailsPage() {
         {/* Hiring Details */}
         {hiringRounds.length > 0 ? (
           <div className="space-y-4 sm:space-y-6">
-            {hiringRounds.map((role: any, idx: number) => (
+            {hiringRounds.map((role, idx: number) => (
               <div key={idx} className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-4 sm:p-5 lg:p-6 border-b border-slate-200">
                   <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 mb-3 sm:mb-4 break-words">{role.role_title}</h2>
@@ -101,7 +97,7 @@ export default function CompanyHiringDetailsPage() {
                     <div>
                       <h3 className="font-bold text-slate-900 mb-3 sm:mb-4 text-base sm:text-lg lg:text-xl">Interview Rounds ({role.hiring_rounds.length})</h3>
                       <div className="space-y-3 sm:space-y-4">
-                        {role.hiring_rounds.map((round: any, i: number) => (
+                        {role.hiring_rounds.map((round, i: number) => (
                           <div
                             key={i}
                             className="border border-slate-200 rounded-lg p-3 sm:p-4 bg-slate-50"
@@ -123,8 +119,8 @@ export default function CompanyHiringDetailsPage() {
                                   <div>
                                     <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Required Skills</p>
                                     <div className="flex flex-wrap gap-2">
-                                      {round.skill_sets.map((skill: any, si: number) => (
-                                        <Chip key={si} label={skill.skill_set_code} variant="secondary" />
+                                      {round.skill_sets.map((skill, si: number) => (
+                                        <Chip key={si} label={skill.skill_set_code || 'General Skill'} variant="secondary" />
                                       ))}
                                     </div>
                                   </div>
@@ -148,7 +144,7 @@ export default function CompanyHiringDetailsPage() {
                       <li className="break-words">Practice each round type in the order mentioned above</li>
                       <li className="break-words">Focus on the specific skills listed for each round</li>
                       <li className="break-words">Prepare real-world examples matching the role category</li>
-                      <li className="break-words">Research {companyName}'s technology stack and company culture</li>
+                      <li className="break-words">Research {companyName}&apos;s technology stack and company culture</li>
                       <li className="break-words">Practice coding/technical problems for {role.role_category} positions</li>
                     </ul>
                   </div>

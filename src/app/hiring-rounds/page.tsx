@@ -5,6 +5,7 @@ import { Briefcase } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Layout } from '@/components';
+import hiringRoundData from '@/data/Hiring_rounds.json';
 import { getCompaniesShort } from '@/utils/data';
 
 interface HiringCompany {
@@ -14,18 +15,28 @@ interface HiringCompany {
   totalRounds: number;
 }
 
+interface HiringRoleDetail {
+  role_title: string;
+  hiring_rounds?: unknown[];
+}
+
+interface HiringRoundCompany {
+  company_name: string;
+  job_role_details?: HiringRoleDetail[];
+}
+
 // Get unique companies from hiring data with logos
 function getUniqueCompaniesFromHiring(): HiringCompany[] {
-  const hiringRoundData = require('@/data/Hiring_rounds.json');
   const allCompanies = getCompaniesShort();
+  const data = hiringRoundData as HiringRoundCompany[];
   
-  return hiringRoundData.map((company: any) => {
+  return data.map((company) => {
     const companyData = allCompanies.find(c => c.name === company.company_name);
     return {
       name: company.company_name,
       logoUrl: companyData?.logo_url || '',
-      jobRoles: company.job_role_details?.map((role: any) => role.role_title) || [],
-      totalRounds: company.job_role_details?.reduce((sum: number, role: any) => sum + (role.hiring_rounds?.length || 0), 0) || 0,
+      jobRoles: company.job_role_details?.map((role) => role.role_title) || [],
+      totalRounds: company.job_role_details?.reduce((sum, role) => sum + (role.hiring_rounds?.length || 0), 0) || 0,
     };
   });
 }
@@ -66,7 +77,7 @@ export default function HiringRoundsPage() {
                     </div>
                   ) : (
                     <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 flex-shrink-0 bg-slate-100 rounded-lg flex items-center justify-center">
-                      <Briefcase className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-slate-400" />
+                      <Briefcase className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-slate-500" />
                     </div>
                   )}
                   <h3 className="text-base sm:text-lg font-bold text-slate-900 flex-1 break-words">{company.name}</h3>

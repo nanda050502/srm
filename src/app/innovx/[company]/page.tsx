@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Layout } from '@/components';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   TrendingUp, 
@@ -14,7 +14,6 @@ import {
   Zap,
   Award,
   Layers,
-  Activity,
   CheckCircle,
   Building2,
   Globe,
@@ -29,27 +28,93 @@ import innovxData from '@/data/innovx_master.json';
 
 type TabType = 'competitive-landscape' | 'innovx-projects' | 'strategic-pillars' | 'innovation-roadmap' | 'industry-trends';
 
+interface CompanyMaster {
+  company_name: string;
+  industry: string;
+  geographic_focus: string;
+  target_market: string;
+}
+
+interface IndustryTrend {
+  trend_name: string;
+  trend_description: string;
+  strategic_importance: 'Critical' | 'High' | string;
+  time_horizon_years: number;
+  trend_drivers?: string[];
+  impact_areas?: string[];
+}
+
+interface InnovationRoadmapItem {
+  innovation_theme: string;
+  innovation_type: string;
+  time_horizon: 'Now' | 'Next' | string;
+  problem_statement: string;
+  expected_outcome: string;
+  target_customer: string;
+  required_capabilities?: string[];
+}
+
+interface StrategicPillar {
+  pillar_name: string;
+  focus_area: 'Efficiency' | 'Defense' | 'Growth' | string;
+  pillar_description: string;
+  cto_vision_statement: string;
+  key_technologies?: string[];
+  strategic_risks: string;
+  strategic_assumptions: string;
+}
+
+interface InnovxProject {
+  project_name: string;
+  tier_level: 'Tier 1' | 'Tier 2' | 'Tier 3' | string;
+  architecture_style: string;
+  problem_statement: string;
+  innovation_objective: string;
+  differentiation_factor: string;
+  target_users: string;
+  business_value: string;
+  backend_technologies?: string[];
+  frontend_technologies?: string[];
+  ai_ml_technologies?: string[];
+  infrastructure_cloud?: string;
+  aligned_pillar_names?: string[];
+}
+
+interface CompetitiveLandscape {
+  competitor_name: string;
+  threat_level: 'High' | 'Medium' | string;
+  core_strength: string;
+  market_positioning: string;
+  bet_name: string;
+  bet_description: string;
+  innovation_category: string;
+  futuristic_level: string;
+  competitor_type: string;
+}
+
+interface InnovxCompany {
+  innovx_master: CompanyMaster;
+  industry_trends?: IndustryTrend[];
+  innovation_roadmap?: InnovationRoadmapItem[];
+  strategic_pillars?: StrategicPillar[];
+  innovx_projects?: InnovxProject[];
+  competitive_landscape?: CompetitiveLandscape[];
+}
+
 export default function CompanyInnovXPage() {
   const params = useParams();
-  const router = useRouter();
   const companyName = params?.company ? decodeURIComponent(params.company as string) : '';
   
   const [selectedTab, setSelectedTab] = useState<TabType>('industry-trends');
-  const [companyInfo, setCompanyInfo] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (companyName) {
-      const company = innovxData.companies.find(
-        (c: any) => c.innovx_master?.company_name?.toLowerCase() === companyName.toLowerCase()
-      );
-      
-      if (company) {
-        setCompanyInfo(company);
-      }
-      setLoading(false);
-    }
-  }, [companyName]);
+  const companies = innovxData.companies as InnovxCompany[];
+  const companyInfo = useMemo(
+    () =>
+      companies.find(
+        (c) => c.innovx_master?.company_name?.toLowerCase() === companyName.toLowerCase()
+      ) || null,
+    [companies, companyName]
+  );
+  const loading = !companyName;
 
   if (loading) {
     return (
@@ -100,7 +165,7 @@ export default function CompanyInnovXPage() {
       case 'industry-trends':
         return (
           <div className="space-y-3 sm:space-y-4">
-            {trends.map((trend: any, idx: number) => (
+            {trends.map((trend, idx: number) => (
               <div 
                 key={idx} 
                 className="border-2 border-slate-200 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:border-blue-400 hover:shadow-lg transition-all duration-300 bg-white"
@@ -177,7 +242,7 @@ export default function CompanyInnovXPage() {
       case 'innovation-roadmap':
         return (
           <div className="space-y-6">
-            {roadmap.map((item: any, idx: number) => (
+            {roadmap.map((item, idx: number) => (
               <div 
                 key={idx} 
                 className="border-2 border-slate-200 rounded-xl overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all duration-300"
@@ -258,7 +323,7 @@ export default function CompanyInnovXPage() {
       case 'strategic-pillars':
         return (
           <div className="space-y-4">
-            {pillars.map((pillar: any, idx: number) => (
+            {pillars.map((pillar, idx: number) => (
               <div 
                 key={idx} 
                 className="border-2 border-slate-200 rounded-xl p-6 hover:border-blue-400 hover:shadow-lg transition-all duration-300 bg-white"
@@ -294,7 +359,7 @@ export default function CompanyInnovXPage() {
                     <p className="text-slate-700 leading-relaxed mb-3">{pillar.pillar_description}</p>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
                       <p className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">CTO Vision</p>
-                      <p className="text-slate-800 font-medium italic">"{pillar.cto_vision_statement}"</p>
+                      <p className="text-slate-800 font-medium italic">&quot;{pillar.cto_vision_statement}&quot;</p>
                     </div>
                   </div>
                 </div>
@@ -336,11 +401,11 @@ export default function CompanyInnovXPage() {
         );
 
       case 'innovx-projects':
-        const tier1Projects = projects.filter((p: any) => p.tier_level === 'Tier 1');
-        const tier2Projects = projects.filter((p: any) => p.tier_level === 'Tier 2');
-        const tier3Projects = projects.filter((p: any) => p.tier_level === 'Tier 3');
+        const tier1Projects = projects.filter((p) => p.tier_level === 'Tier 1');
+        const tier2Projects = projects.filter((p) => p.tier_level === 'Tier 2');
+        const tier3Projects = projects.filter((p) => p.tier_level === 'Tier 3');
 
-        const renderProjectCard = (project: any, idx: number) => (
+        const renderProjectCard = (project: InnovxProject, idx: number) => (
           <div 
             key={idx} 
             className="border-2 border-slate-200 rounded-xl overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all duration-300"
@@ -517,7 +582,7 @@ export default function CompanyInnovXPage() {
                   </div>
                 </div>
                 <div className="p-6 space-y-6">
-                  {tier1Projects.map((project: any, idx: number) => renderProjectCard(project, idx))}
+                  {tier1Projects.map((project, idx: number) => renderProjectCard(project, idx))}
                 </div>
               </div>
             )}
@@ -540,7 +605,7 @@ export default function CompanyInnovXPage() {
                   </div>
                 </div>
                 <div className="p-6 space-y-6">
-                  {tier2Projects.map((project: any, idx: number) => renderProjectCard(project, idx))}
+                  {tier2Projects.map((project, idx: number) => renderProjectCard(project, idx))}
                 </div>
               </div>
             )}
@@ -563,7 +628,7 @@ export default function CompanyInnovXPage() {
                   </div>
                 </div>
                 <div className="p-6 space-y-6">
-                  {tier3Projects.map((project: any, idx: number) => renderProjectCard(project, idx))}
+                  {tier3Projects.map((project, idx: number) => renderProjectCard(project, idx))}
                 </div>
               </div>
             )}
@@ -573,7 +638,7 @@ export default function CompanyInnovXPage() {
       case 'competitive-landscape':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {competitors.map((comp: any, idx: number) => (
+            {competitors.map((comp, idx: number) => (
               <div 
                 key={idx} 
                 className="border-2 border-slate-200 rounded-xl p-6 hover:border-blue-400 hover:shadow-lg transition-all duration-300 bg-white"

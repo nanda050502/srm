@@ -45,9 +45,9 @@ export default function CompanySkillPage({ params }: PageProps) {
     const skillMentions = new Map<string, { count: number; examples: string[]; roles: Set<string> }>();
     
     if (hiringData?.job_role_details) {
-      hiringData.job_role_details.forEach((role: any) => {
-        role.hiring_rounds?.forEach((round: any) => {
-          round.skill_sets?.forEach((skill: any) => {
+      hiringData.job_role_details.forEach((role) => {
+        role.hiring_rounds?.forEach((round) => {
+          round.skill_sets?.forEach((skill) => {
             const skillCode = skill.skill_set_code;
             if (!skillCode) return;
             
@@ -57,7 +57,7 @@ export default function CompanySkillPage({ params }: PageProps) {
             
             const data = skillMentions.get(skillCode)!;
             data.count += 1;
-            data.roles.add(role.role_title);
+            data.roles.add(role.role_title || 'General Role');
             if (skill.typical_questions && data.examples.length < 3) {
               data.examples.push(skill.typical_questions);
             }
@@ -72,7 +72,7 @@ export default function CompanySkillPage({ params }: PageProps) {
       skillMentions,
       totalRoles: hiringData?.job_role_details?.length || 0,
       totalRounds: hiringData?.job_role_details?.reduce(
-        (sum: number, role: any) => sum + (role.hiring_rounds?.length || 0),
+        (sum, role) => sum + (role.hiring_rounds?.length || 0),
         0
       ) || 0,
     };
@@ -188,7 +188,7 @@ export default function CompanySkillPage({ params }: PageProps) {
                           </div>
                           {mentions.examples.length > 0 && (
                             <p className="text-xs text-slate-500 italic line-clamp-2">
-                              "{mentions.examples[0]}"
+                              &quot;{mentions.examples[0]}&quot;
                             </p>
                           )}
                         </div>
@@ -209,9 +209,9 @@ export default function CompanySkillPage({ params }: PageProps) {
             </p>
 
             <div className="space-y-4">
-              {skillData.hiringData.job_role_details.map((role: any, roleIdx: number) => {
+              {skillData.hiringData.job_role_details.map((role, roleIdx: number) => {
                 const totalSkills = role.hiring_rounds?.reduce(
-                  (sum: number, round: any) => sum + (round.skill_sets?.length || 0),
+                  (sum: number, round) => sum + (round.skill_sets?.length || 0),
                   0
                 ) || 0;
 
@@ -229,7 +229,7 @@ export default function CompanySkillPage({ params }: PageProps) {
                       </div>
                     </div>
 
-                    {role.hiring_rounds?.map((round: any, roundIdx: number) => (
+                    {role.hiring_rounds?.map((round, roundIdx: number) => (
                       <div key={roundIdx} className="mb-4 last:mb-0">
                         <div className="flex items-center gap-2 mb-3">
                           <span className="bg-slate-700 text-white px-2 py-1 rounded text-xs font-bold">
@@ -244,10 +244,10 @@ export default function CompanySkillPage({ params }: PageProps) {
 
                         {round.skill_sets && round.skill_sets.length > 0 ? (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 ml-4">
-                            {round.skill_sets.map((skill: any, skillIdx: number) => {
+                            {round.skill_sets.map((skill, skillIdx: number) => {
                               // Try to find matching skill level data
                               const skillKey = skill.skill_set_code?.toLowerCase().replace(/\s+/g, '_');
-                              const levelData = skillData.skillLevels?.skills[skillKey];
+                              const levelData = skillKey ? skillData.skillLevels?.skills[skillKey] : undefined;
 
                               return (
                                 <div
@@ -271,7 +271,7 @@ export default function CompanySkillPage({ params }: PageProps) {
 
                                   {skill.typical_questions && (
                                     <p className="text-xs text-slate-600 italic">
-                                      "{skill.typical_questions}"
+                                      &quot;{skill.typical_questions}&quot;
                                     </p>
                                   )}
                                 </div>

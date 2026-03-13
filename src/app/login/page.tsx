@@ -17,17 +17,34 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
-  // Default credentials
-  const DEFAULT_PASSWORD = 'password123';
-
   // Check if already logged in
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn');
-    if (loggedIn) {
-      router.push('/');
-    } else {
-      setIsChecking(false);
-    }
+    let isMounted = true;
+
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session', { cache: 'no-store' });
+        const session = await response.json();
+        if (!isMounted) return;
+
+        if (session.authenticated) {
+          router.push(session.role === 'admin' ? '/admin' : '/');
+          return;
+        }
+      } catch {
+        // Fall through to login form.
+      } finally {
+        if (isMounted) {
+          setIsChecking(false);
+        }
+      }
+    };
+
+    checkSession();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   // Generate random CAPTCHA text
@@ -119,7 +136,7 @@ export default function LoginPage() {
     drawCaptcha(newText);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -155,23 +172,32 @@ export default function LoginPage() {
     // Extract NetID (remove @srmist.edu.in if present)
     const netId = email.split('@')[0].toLowerCase();
 
-    // Validate credentials (NetID is "student")
-    if (netId === 'student' && password === DEFAULT_PASSWORD) {
-      // Simulate login delay
-      setTimeout(() => {
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', `${netId}@srmist.edu.in`);
-        router.push('/');
-      }, 500);
-    } else {
-      setError('Invalid NetID or password');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ netId, password }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.authenticated) {
+        setError(result.error || 'Invalid NetID or password');
+        handleRefreshCaptcha();
+        setIsLoading(false);
+        return;
+      }
+
+      router.push(result.role === 'admin' ? '/admin' : '/');
+    } catch {
+      setError('Unable to sign in right now. Please try again.');
       handleRefreshCaptcha();
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen lg:h-screen bg-gray-100 flex flex-col">
       {isChecking ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
@@ -184,10 +210,10 @@ export default function LoginPage() {
       ) : (
         <>
           {/* Main Content - Single Responsive Container */}
-          <div className="flex-1 flex">
+          <div className="flex-1 flex lg:overflow-hidden">
             <div className="w-full flex flex-col lg:flex-row">
               {/* Left Section - Info Panel */}
-              <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-gray-100 relative flex-col justify-start overflow-y-auto">
+              <div className="hidden lg:flex lg:w-1/2 lg:h-full bg-gray-100 relative flex-col justify-start overflow-y-auto">
                 <div className="absolute top-[0.125rem] left-8">
                   <Image 
                     src="/logos/srm-logo.png" 
@@ -249,8 +275,8 @@ export default function LoginPage() {
               </div>
 
               {/* Right Section - Login Card */}
-              <div className="w-full lg:w-1/2 min-h-screen bg-gray-100 flex items-center justify-center py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
-                <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-200 my-auto">
+              <div className="w-full lg:w-1/2 lg:h-full bg-gray-100 flex items-center justify-center py-6 sm:py-8 lg:py-6 px-4 sm:px-6 lg:px-8 overflow-y-auto">
+                <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-6 border border-gray-200 my-auto">
                   <div className="mb-6 text-center">
                     <div className="flex justify-center mb-3 lg:hidden">
                       <Image 
@@ -365,10 +391,11 @@ export default function LoginPage() {
           </div>
 
           {/* Footer with Demo Credentials */}
-          <div className="bg-gray-900 text-white py-6 px-4 text-center space-y-2">
+          <div className="bg-gray-900 text-white py-6 lg:py-3 px-4 text-center space-y-2 lg:space-y-1">
             <div className="text-xs text-gray-400 mb-2">
               <p className="font-semibold">Demo Credentials</p>
-              <p><span className="text-gray-300">NetID:</span> student | <span className="text-gray-300">Password:</span> password123</p>
+              <p><span className="text-gray-300">Student:</span> student / password123</p>
+              <p><span className="text-gray-300">Admin:</span> admin / admin123</p>
             </div>
             <p className="text-xs text-gray-500">© 2026 SRM Institute of Science & Technology. All Rights Reserved.</p>
           </div>

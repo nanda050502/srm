@@ -10,6 +10,8 @@ export interface CompanyShort {
   name: string;
   short_name: string;
   logo_url: string;
+  website_url?: string;
+  website?: string;
   category: string;
   employee_size: string;
   operating_countries: string;
@@ -18,8 +20,197 @@ export interface CompanyShort {
 }
 
 export interface CompanyFull extends CompanyShort {
-  [key: string]: any;
+  overview_text?: string;
+  vision_statement?: string;
+  mission_statement?: string;
+  core_values?: string;
+  incorporation_year?: number | string;
+  founded_year?: number | string;
+  headquarters_address?: string;
+  headquarters?: string;
+  nature_of_company?: string;
+  office_count?: string;
+  unique_differentiators?: string;
+  history_timeline?: string;
+  recent_news?: string;
+  awards_recognitions?: string;
+  brand_positioning?: string;
+  target_markets?: string;
+  market_share?: string;
+  competitive_advantages?: string;
+  key_competitors?: string;
+  tam?: string | number;
+  sam?: string | number;
+  som?: string | number;
+  market_share_percentage?: string | number;
+  focus_sectors?: string;
+  weaknesses_gaps?: string;
+  key_challenges_needs?: string;
+  top_customers?: string;
+  core_value_proposition?: string;
+  pain_points_addressed?: string;
+  net_promoter_score?: number | string;
+  churn_rate?: string;
+  customer_lifetime_value?: string;
+  customer_acquisition_cost?: string;
+  business_model?: string;
+  revenue_streams?: string;
+  offerings_description?: string;
+  product_pipeline?: string;
+  go_to_market_strategy?: string;
+  sales_motion?: string;
+  cac_ltv_ratio?: string;
+  key_leaders?: string;
+  board_members?: string;
+  leadership_style?: string;
+  ceo_name?: string;
+  ceo_linkedin_url?: string;
+  cfo_name?: string;
+  cto_name?: string;
+  coo_name?: string;
+  contact_person_name?: string;
+  contact_person_title?: string;
+  primary_phone_number?: string;
+  contact_person_phone?: string;
+  warm_intro_pathways?: string;
+  decision_maker_access?: string;
+  revenue?: string;
+  profitability?: string;
+  annual_revenue?: string;
+  annual_profit?: string;
+  profitability_status?: string;
+  revenue_mix?: string;
+  key_investors?: string;
+  funding_stage?: string;
+  capital_structure?: string;
+  cash_flow?: string;
+  valuation?: string;
+  burn_rate?: string;
+  runway_months?: string;
+  burn_multiplier?: string;
+  tech_stack?: string;
+  cloud_infrastructure?: string;
+  ai_adoption_level?: string;
+  ai_maturity_stage?: string;
+  ai_use_cases?: string;
+  automation_tools?: string;
+  ml_frameworks?: string;
+  data_infrastructure?: string;
+  cyber_security_posture?: string;
+  patents?: string;
+  technology_partnerships?: string;
+  r_and_d_investment?: string;
+  r_and_d_focus_areas?: string;
+  work_culture?: string;
+  dei_initiatives?: string;
+  diversity_metrics?: string;
+  learning_development_programs?: string;
+  employee_benefits?: string;
+  avg_retention_tenure?: string;
+  employee_turnover?: string;
+  hiring_velocity?: string;
+  training_budget_per_employee?: string;
+  mentorship_program?: string;
+  compensation_philosophy?: string;
+  performance_bonus_structure?: string;
+  hybrid_remote_policy?: string;
+  workplace_safety_record?: string;
+  employee_satisfaction?: string;
+  attrition_rate?: string;
+  esg_ratings?: string;
+  sustainability_goals?: string;
+  environmental_commitment?: string;
+  governance_model?: string;
+  compliance_certifications?: string;
+  cybersecurity_posture?: string;
+  geopolitical_risks?: string;
+  macro_risks?: string;
+  crisis_history?: string;
+  supply_chain_dependencies?: string;
+  strategic_priorities?: string;
+  innovation_roadmap?: string;
+  growth_trajectory?: string;
+  future_outlook?: string;
+  market_expansion_plans?: string;
+  market_opportunities?: string;
+  competitive_threats?: string;
+  strategic_partnerships?: string;
+  joint_ventures?: string;
+  partnership_opportunities?: string;
+  linkedin_url?: string;
+  twitter_handle?: string;
+  instagram_handle?: string;
+  primary_contact_email?: string;
+  contact_person_email?: string;
+  phone?: string;
+  [key: string]: string | number | boolean | null | undefined | string[];
 }
+
+interface HiringRoundSkill {
+  skill_set_code?: string;
+  typical_questions?: string;
+}
+
+interface HiringRound {
+  round_number?: number;
+  round_name?: string;
+  round_category?: string;
+  evaluation_type?: string;
+  assessment_mode?: string;
+  skill_sets?: HiringRoundSkill[];
+}
+
+interface HiringRole {
+  role_title?: string;
+  role_category?: string;
+  opportunity_type?: string;
+  job_description?: string;
+  compensation?: string;
+  ctc_or_stipend?: number;
+  bonus?: string;
+  benefits_summary?: string;
+  hiring_rounds?: HiringRound[];
+}
+
+interface HiringRoundsEntry {
+  company_name?: string;
+  job_role_details?: HiringRole[];
+}
+
+interface InnovxEntry {
+  innovx_master?: {
+    company_name?: string;
+  };
+  industry_trends?: Array<{
+    trend_name: string;
+    trend_description: string;
+    trend_drivers: string[];
+  }>;
+  competitive_landscape?: Array<{
+    competitor_name: string;
+    market_positioning: string;
+    innovation_category: string;
+    threat_level: string;
+  }>;
+  innovation_roadmap?: Array<{
+    innovation_theme: string;
+    problem_statement: string;
+    innovation_type: string;
+    time_horizon: string;
+  }>;
+  innovx_projects?: Array<{
+    tier_level: string;
+    project_name: string;
+    problem_statement: string;
+    backend_technologies: string[];
+    business_value: string;
+  }>;
+}
+
+type RawCompany = Partial<CompanyFull> & {
+  id?: string | number;
+  company_id?: string | number;
+};
 
 const normalizeCompanyId = (id: string | number | undefined): string | undefined => {
   if (id === undefined || id === null) return undefined;
@@ -28,18 +219,101 @@ const normalizeCompanyId = (id: string | number | undefined): string | undefined
   return idString.startsWith('comp_') ? idString : `comp_${idString}`;
 };
 
+const extractFirstHttpUrl = (rawValue: string): string => {
+  const markdownLinkMatch = rawValue.match(/\((https?:\/\/[^\s)]+)\)/i);
+  const base = markdownLinkMatch?.[1] || rawValue;
+
+  const withoutOuterBrackets =
+    base.startsWith('[') && base.endsWith(']') ? base.slice(1, -1) : base;
+
+  const parts = withoutOuterBrackets
+    .split(/[;,]\s*/)
+    .map((part) => part.trim().replace(/^['"]|['"]$/g, ''))
+    .filter(Boolean);
+
+  const firstValid = parts.find((part) => /^https?:\/\//i.test(part));
+  if (firstValid) return firstValid;
+
+  const directMatch = withoutOuterBrackets.match(/https?:\/\/[^\s;,)\]]+/i);
+  return directMatch?.[0] || '';
+};
+
+const extractDomain = (urlValue: string): string => {
+  const cleaned = extractFirstHttpUrl(urlValue);
+  const fallbackCleaned = cleaned || urlValue.trim();
+  if (!fallbackCleaned) return '';
+
+  try {
+    const normalized = /^https?:\/\//i.test(fallbackCleaned)
+      ? fallbackCleaned
+      : `https://${fallbackCleaned}`;
+    const hostname = new URL(normalized).hostname.toLowerCase();
+    return hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+};
+
+const extractDomainFromEmail = (email?: string): string => {
+  if (!email || typeof email !== 'string') return '';
+  const match = email.trim().match(/@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/);
+  return match?.[1]?.toLowerCase() || '';
+};
+
+export const getClearbitLogoUrl = (websiteUrl?: string): string => {
+  if (!websiteUrl) return '';
+  const domain = extractDomain(websiteUrl);
+  return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=256` : '';
+};
+
+export const getRenderableLogoUrl = (logoUrl?: string, websiteUrl?: string): string => {
+  const normalizedLogoUrl = logoUrl ? extractFirstHttpUrl(logoUrl.trim()) : '';
+  if (normalizedLogoUrl) return normalizedLogoUrl;
+
+  if (!websiteUrl) return '';
+  const domain = extractDomain(websiteUrl);
+  return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=256` : '';
+};
+
+export const getWebsiteFallbackLogoUrl = (websiteUrl?: string): string => {
+  if (!websiteUrl) return '';
+  const domain = extractDomain(websiteUrl);
+  return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
+};
+
 // Normalize company ID
-const normalizeCompany = (company: any): CompanyShort & { id: string } => {
+const normalizeCompany = (company: RawCompany): CompanyFull & { id: string } => {
   const normalizedId = normalizeCompanyId(company.id ?? company.company_id);
   return {
-    ...company,
+    ...(company as CompanyFull),
     id: normalizedId || '',
   };
 };
 
 export const getCompaniesShort = (): (CompanyShort & { id: string })[] => {
+  const fullCompanies = Array.isArray(companiesFull) ? companiesFull : [companiesFull];
+  const fullById = new Map(
+    fullCompanies.map(normalizeCompany).map((company) => [company.id, company])
+  );
+
   const companies = Array.isArray(companiesShort) ? companiesShort : [companiesShort];
-  return companies.map(normalizeCompany);
+  return companies.map(normalizeCompany).map((company) => {
+    const fullCompany = fullById.get(company.id);
+    if (!fullCompany) return company;
+
+    const derivedWebsiteFromEmail =
+      extractDomainFromEmail(fullCompany.primary_contact_email) ||
+      extractDomainFromEmail(fullCompany.contact_person_email);
+
+    return {
+      ...company,
+      website_url:
+        company.website_url ||
+        fullCompany.website_url ||
+        fullCompany.website ||
+        (derivedWebsiteFromEmail ? `https://${derivedWebsiteFromEmail}` : undefined),
+    };
+  });
 };
 
 export const getCompaniesFull = (): (CompanyFull & { id: string })[] => {
@@ -63,18 +337,18 @@ export const searchCompanies = (query: string): (CompanyShort & { id: string })[
 
 export const getHiringRoundsData = (companyName?: string) => {
   if (!companyName) return undefined;
-  const data = Array.isArray(hiringRounds) ? hiringRounds : [hiringRounds];
+  const data = (Array.isArray(hiringRounds) ? hiringRounds : [hiringRounds]) as HiringRoundsEntry[];
   const normalizedSearch = companyName.toLowerCase().trim();
-  return data.find((company: any) => 
+  return data.find((company) => 
     company.company_name?.toLowerCase().trim() === normalizedSearch
   );
 };
 
 export const getInnovxDataForCompany = (companyName?: string) => {
   if (!companyName) return undefined;
-  const data = innovxMaster.companies || [];
+  const data = (innovxMaster.companies || []) as InnovxEntry[];
   const normalizedSearch = companyName.toLowerCase().trim();
-  return data.find((company: any) => 
+  return data.find((company) => 
     company.innovx_master?.company_name?.toLowerCase().trim() === normalizedSearch
   );
 };

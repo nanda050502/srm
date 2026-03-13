@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Chip } from './UI';
 import { Zap, Building2, TrendingUp, Briefcase, Clock, Coins, Heart, Book, Camera, Code, Cloud, Server } from 'lucide-react';
-import { formatPercentage } from '@/utils/data';
+import { formatPercentage, getRenderableLogoUrl, getClearbitLogoUrl, getWebsiteFallbackLogoUrl } from '@/utils/data';
 
 interface CompanyCardProps {
   id: string;
   name: string;
   short_name: string;
   logo_url: string;
+  website_url?: string;
   category: string;
   employee_size: string;
   office_locations: string;
@@ -161,8 +162,13 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({
   office_locations,
   operating_countries,
   yoy_growth_rate,
+  website_url,
 }) => {
-  const [imageError, setImageError] = useState(!logo_url);
+  const resolvedLogoUrl = getRenderableLogoUrl(logo_url, website_url);
+  const clearbitLogoUrl = getClearbitLogoUrl(website_url);
+  const faviconFallbackUrl = getWebsiteFallbackLogoUrl(website_url);
+  const [imageSrc, setImageSrc] = useState(resolvedLogoUrl);
+  const [imageError, setImageError] = useState(!resolvedLogoUrl);
   const offices = office_locations.split(';').map((o) => o.trim());
   const countries = operating_countries.split(';').map((c) => c.trim());
   const categoryConfig = getCategoryConfig(category);
@@ -177,8 +183,8 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 overflow-hidden cursor-pointer group h-full">
         {/* Card Header */}
         <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-b border-slate-200">
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-16 h-16 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shadow-sm">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="w-16 h-16 shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shadow-sm">
               {imageError ? (
                 <div className={`w-full h-full ${bgColor} flex items-center justify-center`}>
                   <span className="text-white font-bold text-lg">{initials}</span>
@@ -187,18 +193,28 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={logo_url}
+                    src={imageSrc}
                     alt={name}
                     className="w-14 h-14 object-contain"
-                    onError={() => setImageError(true)}
+                    onError={() => {
+                      if (clearbitLogoUrl && imageSrc !== clearbitLogoUrl) {
+                        setImageSrc(clearbitLogoUrl);
+                        return;
+                      }
+                      if (faviconFallbackUrl && imageSrc !== faviconFallbackUrl) {
+                        setImageSrc(faviconFallbackUrl);
+                        return;
+                      }
+                      setImageError(true);
+                    }}
                   />
                 </>
               )}
             </div>
-            <div className="text-right flex flex-col gap-2 items-end">
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${categoryConfig.bgColor}`}>
-                <span className={categoryConfig.color}>{categoryConfig.icon}</span>
-                <span className={`${categoryConfig.color} text-xs font-semibold`}>{category}</span>
+            <div className="min-w-0 max-w-[60%] text-right flex flex-col gap-2 items-end">
+              <div className={`inline-flex max-w-full items-center gap-1.5 px-3 py-1.5 rounded-lg border ${categoryConfig.bgColor}`}>
+                <span className={`${categoryConfig.color} shrink-0`}>{categoryConfig.icon}</span>
+                <span className={`${categoryConfig.color} text-xs font-semibold truncate`}>{category}</span>
               </div>
             </div>
           </div>

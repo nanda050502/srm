@@ -5,7 +5,19 @@ import { Building2, Crown, FileText, Flame, Globe, LineChart, Rocket, Star } fro
 import { useRouter } from 'next/navigation';
 import { Layout, MetricCard } from '@/components';
 import { GlobalSearch } from '@/components/Search';
-import { getCompaniesShort, categorizeCompanies, getStatistics, formatPercentage } from '@/utils/data';
+import { getCompaniesShort, categorizeCompanies, getStatistics, formatPercentage, getRenderableLogoUrl, getClearbitLogoUrl, getWebsiteFallbackLogoUrl } from '@/utils/data';
+
+interface DashboardCompanySummary {
+  id: string;
+  name: string;
+  short_name: string;
+  logo_url: string;
+  website_url?: string;
+  website?: string;
+  category?: string;
+  employee_size: string;
+  yoy_growth_rate: string | number;
+}
 
 export default function Dashboard() {
   const router = useRouter();
@@ -13,14 +25,41 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
-    const loggedIn = localStorage.getItem('isLoggedIn');
-    if (!loggedIn) {
-      router.push('/login');
-    } else {
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    }
+    let isMounted = true;
+
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session', { cache: 'no-store' });
+        const session = await response.json();
+        if (!isMounted) return;
+
+        if (!session.authenticated) {
+          router.push('/login');
+          return;
+        }
+
+        if (session.role === 'admin') {
+          router.push('/admin');
+          return;
+        }
+
+        setIsAuthenticated(true);
+      } catch {
+        if (isMounted) {
+          router.push('/login');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkSession();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   if (isLoading || !isAuthenticated) {
@@ -60,7 +99,7 @@ export default function Dashboard() {
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 leading-tight">
                 Discover Your Dream Company
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-blue-100 mb-4 sm:mb-6 lg:mb-8 px-2">
+              <p className="text-base sm:text-lg lg:text-xl text-white mb-4 sm:mb-6 lg:mb-8 px-2">
                 Explore company intelligence, skills requirements, and placement insights powered by real data.
               </p>
             </div>
@@ -70,7 +109,7 @@ export default function Dashboard() {
               <GlobalSearch companies={searchableCompanies} onSelect={handleSearch} />
             </div>
 
-            <div className="text-xs sm:text-sm text-blue-100">
+            <div className="text-xs sm:text-sm text-white">
               <p>Search across {companies.length} companies and their placement insights</p>
             </div>
           </div>
@@ -166,12 +205,16 @@ export default function Dashboard() {
 }
 
 interface CompanyQuickCardProps {
-  company: any;
+  company: DashboardCompanySummary;
   onSelect: (id: string) => void;
 }
 
 const CompanyQuickCard: React.FC<CompanyQuickCardProps> = ({ company, onSelect }) => {
-  const [imageError, setImageError] = React.useState(!company.logo_url);
+  const logoUrl = getRenderableLogoUrl(company.logo_url, company.website_url || company.website);
+  const clearbitLogoUrl = getClearbitLogoUrl(company.website_url || company.website);
+  const faviconFallbackUrl = getWebsiteFallbackLogoUrl(company.website_url || company.website);
+  const [imageSrc, setImageSrc] = React.useState(logoUrl);
+  const [imageError, setImageError] = React.useState(!logoUrl);
   const initials = company.short_name.substring(0, 2).toUpperCase();
   const colors = ['bg-blue-600', 'bg-slate-700', 'bg-emerald-600', 'bg-amber-600', 'bg-indigo-600', 'bg-rose-600'];
   const colorIndex = company.short_name.charCodeAt(0) % colors.length;
@@ -192,10 +235,20 @@ const CompanyQuickCard: React.FC<CompanyQuickCardProps> = ({ company, onSelect }
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={company.logo_url}
+                src={imageSrc}
                 alt={company.name}
                 className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-                onError={() => setImageError(true)}
+                onError={() => {
+                  if (clearbitLogoUrl && imageSrc !== clearbitLogoUrl) {
+                    setImageSrc(clearbitLogoUrl);
+                    return;
+                  }
+                  if (faviconFallbackUrl && imageSrc !== faviconFallbackUrl) {
+                    setImageSrc(faviconFallbackUrl);
+                    return;
+                  }
+                  setImageError(true);
+                }}
               />
             </>
           )}

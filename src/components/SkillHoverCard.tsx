@@ -112,7 +112,7 @@ export default function SkillHoverCard({
                     <p className="text-xs text-slate-600 font-medium mb-1">Roles requiring this skill:</p>
                     {company.roles.map((role, roleIdx) => (
                       <p key={roleIdx} className="text-xs text-slate-700 pl-3 flex items-start">
-                        <span className="mr-2 text-slate-400">•</span>
+                        <span className="mr-2 text-slate-500">•</span>
                         <span>{role}</span>
                       </p>
                     ))}

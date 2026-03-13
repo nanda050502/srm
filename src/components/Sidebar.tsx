@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   BarChart3,
@@ -99,10 +100,13 @@ export const Sidebar = () => {
         `}
       >
         <div className={`p-4 flex items-center ${isOpen ? 'justify-between' : 'justify-center'}`}>
-          <img
+          <Image
             src="/logos/srm-logo.png"
             alt="SRM Logo"
+            width={140}
+            height={48}
             className={`${isOpen ? 'h-10 sm:h-12' : 'h-8 sm:h-10'} w-auto object-contain`}
+            priority
           />
           <button
             onClick={() => setIsOpen(!isOpen)}

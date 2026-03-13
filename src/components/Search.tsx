@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from './UI';
 
@@ -27,17 +27,11 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   const query = controlledQuery !== undefined ? controlledQuery : internalQuery;
   const setQuery = onQueryChange || setInternalQuery;
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
-
-  useEffect(() => {
-    if (!query.trim()) {
-      setFilteredResults([]);
-      setIsOpen(false);
-      return;
-    }
+  const filteredResults = useMemo(() => {
+    if (!query.trim()) return [];
 
     const lowerQuery = query.toLowerCase();
-    const results = companies
+    return companies
       .filter(
         (company) =>
           company.name.toLowerCase().includes(lowerQuery) ||
@@ -45,9 +39,6 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       )
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 10);
-
-    setFilteredResults(results);
-    setIsOpen(results.length > 0);
   }, [query, companies]);
 
   const handleSelect = (companyId: string) => {
@@ -69,9 +60,13 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
         type="text"
         placeholder={placeholder}
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          const nextQuery = e.target.value;
+          setQuery(nextQuery);
+          setIsOpen(Boolean(nextQuery.trim()));
+        }}
         onKeyDown={handleEnterKeySelect}
-        onFocus={() => query && setIsOpen(true)}
+        onFocus={() => query.trim() && setIsOpen(true)}
         onBlur={() => setTimeout(() => setIsOpen(false), 200)}
         className="w-full text-lg py-3 pl-11 pr-4"
       />
